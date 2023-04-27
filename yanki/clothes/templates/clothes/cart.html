@@ -1,0 +1,215 @@
+{% extends 'clothes/otherlist.html' %}
+						{% block breadcrumbs %}
+							{{block.super}}
+							<a href="{% url 'cart' %}" class="navigation__li">Корзина
+								<span class="navigation__row icon-row"></span>
+							</a>{% endblock %}
+
+								{% block body %}
+								<div class="cart">
+									<div class="cart__wrapper">{% if object_list %}
+										<div class="cart__body">
+											<div class="cart__title text-20">Ваш заказ</div>
+											<div class="cart__items">{% for obj in object_list %}
+												<div data-price="{{obj.parent.price}}" data-id="{{obj.id}}" data-max="{{ obj.count }}" class="cart__item">
+													<a href="{{ obj.parent.get_absolute_url }}" class="cart__img"><img src="{{ obj.image_1.url }}" alt="img"></a>
+													<div class="cart__data">
+														<div class="cart__part1">
+															<div class="cart__art text-14">арт. {{obj.id}}</div>
+														</div>
+														<div class="cart__part2">
+															<div class="cart__part2-text">
+																<a href="{{ obj.parent.get_absolute_url }}" class="cart__subtitle text-16">{{obj.parent.title}}</a>
+															</div>
+															<div class="cart__part2-other">
+																<div data-da="!cart__data; cart__part3,first,767.98" class="cart__colors">
+																	<div class="cart__color" style="background: {{obj.color.hex}};"></div>
+																</div>
+																<div data-da="!cart__data; cart__part3,1,767.98" class="cart__size">
+																	<span class="text-16">{{ obj.size.title }}</span>
+																</div>
+																<div data-da="!cart__data; cart__part3,2,767.98" class="cart__count">
+																	<button type="button" {% if obj.cart == '1' %} disabled {% endif %} class="cart__minus icon-minus {% if obj.cart == '1' %} non_enter {% endif %}"></button>
+																	<span class="text-16">{{ obj.cart }}</span>
+																	<button type="button" {% if obj.max %} disabled {% endif %} class="cart__plus icon-plus {% if obj.max %} non_enter {% endif %}"></button>
+																</div>
+																<div class="cart__price text-16 _price">{{obj.f_price}} {{sign}}</div>
+																<div class="lds-roller">
+																	<div></div>
+																	<div></div>
+																	<div></div>
+																	<div></div>
+																	<div></div>
+																	<div></div>
+																	<div></div>
+																	<div></div>
+																</div>
+																<button type="button" data-da="!cart__data; cart__part3,last,767.98" class="cart__delete icon-delete"></button>
+															</div>
+														</div>
+														<div class="cart__part3"></div>
+													</div>
+												</div>{% endfor %}
+											</div>
+											<div class="cart__itog">
+												<div class="cart__itog-text text-16">К оплате:</div>
+												<div class="cart__itog-sum text-16">{{cart_sum}} {{sign}}</div>
+												<div class="lds-roller">
+																	<div></div>
+																	<div></div>
+																	<div></div>
+																	<div></div>
+																	<div></div>
+																	<div></div>
+																	<div></div>
+																	<div></div>
+																</div>
+											</div>
+											<div class="cart__decoration decoration">
+												<div class="decoration__title text-20">Оформление заказа</div>
+												<form action="#" class="decoration__form" method="POST">
+													<div class="decoration__body">
+														<div class="decoration__info">
+															<div class="decoration__info-item">
+																<div class="decoration__subtitle text-16">Персональные данные:</div>
+																<div class="decoration__box">
+																	<div class="decoration__item">
+																		<input name="firstname" type="text" placeholder="Ваше имя*" class="decoration__input text-16">
+																		<input name="lastname" type="text" placeholder="Ваша фамилия*" class="decoration__input text-16">
+																	</div>
+																	<div class="decoration__item">
+																		<input name="email" type="text" placeholder="Ваш e-mail*" class="decoration__input text-16">
+																		<input name="phone" type="text" placeholder="Ваш телефон*" class="decoration__input text-16">
+																	</div>
+																</div>
+															</div>
+															<div class="decoration__info-item">
+																<div class="decoration__subtitle text-16">Способ доставки:</div>
+																<div class="decoration__box delivery">
+																	<div class="decoration__item">
+																		<div class="decoration__subtitle text-16">По России:</div>
+																		<div class="decoration__subbox delivery">
+																			<div data-value="not" class="decoration__radio">
+																				<div class="decoration__circle">
+																					<div class="decoration__point"></div>
+																				</div>
+																				<div class="decoration__radio-text text-16">Самовывоз - вул. Большая Васильковская 14(м. Льва Толстого)</div>
+																			</div>
+																			<div data-value="new" class="decoration__radio">
+																				<div class="decoration__circle">
+																					<div class="decoration__point"></div>
+																				</div>
+																				<div class="decoration__radio-text text-16">Новая Почта</div>
+																			</div>
+																		</div>
+																	</div>
+																	<div class="decoration__item">
+																		<div class="decoration__subtitle text-16">Международная доставка:</div>
+																		<div class="decoration__subbox delivery">
+																			<div data-value="mailrus" class="decoration__radio">
+																				<div class="decoration__circle">
+																					<div class="decoration__point"></div>
+																				</div>
+																				<div class="decoration__radio-text text-16">Почта России / 1-3 недели / 30$</div>
+																			</div>
+																			<div data-value="DHL" class="decoration__radio">
+																				<div class="decoration__circle">
+																					<div class="decoration__point"></div>
+																				</div>
+																				<div class="decoration__radio-text text-16">DHL / 3-7 дней / 60$</div>
+																			</div>
+																		</div>
+																	</div>
+																</div>
+																<input type="hidden" value="" name="delivery" class="decoration__input">
+															</div>
+															<div class="decoration__info-item">
+																<div class="decoration__subtitle text-16">Адрес доставки:</div>
+																<div class="decoration__box">
+																	<div class="decoration__item">
+																		<input name="city" type="text" class="decoration__input text-16" placeholder="Город*">
+																	</div>
+																	<div class="decoration__item">
+																		<input name="№mail" type="text" class="decoration__input text-16" placeholder="Отделение почты*">
+																	</div>
+																</div>
+															</div>
+															<div class="decoration__info-item">
+																<div class="decoration__subtitle text-16">Способ оплаты:</div>
+																<div class="decoration__box pay">
+																	<div class="decoration__item">
+																		<div class="decoration__subbox pay">
+																			<div data-value="privat" class="decoration__radio">
+																				<div class="decoration__circle">
+																					<div class="decoration__point"></div>
+																				</div>
+																				<div class="decoration__radio-text text-16">Полная предоплата через Приват 24</div>
+																			</div>
+																			<div data-value="nal" class="decoration__radio">
+																				<div class="decoration__circle">
+																					<div class="decoration__point"></div>
+																				</div>
+																				<div class="decoration__radio-text text-16">Наложенным платежом в отделении Новой Почты</div>
+																			</div>
+																		</div>
+																	</div>
+																	<div class="decoration__item">
+																		<div class="decoration__subbox pay">
+																			<div data-value="visa" class="decoration__radio">
+																				<div class="decoration__circle">
+																					<div class="decoration__point"></div>
+																				</div>
+																				<div class="decoration__radio-text text-16">Денежным переводом Visa/MasterCard <img src="http://127.0.0.1:8000/media/image/icons/Visa.jpg"></img> <img src="http://127.0.0.1:8000/media/image/icons/Master.jpg"></img></div>
+																			</div>
+																		</div>
+																	</div>
+																</div>
+																<input type="hidden" value="" name="pay" class="decoration__input">
+															</div>
+															<div class="decoration__info-item">
+																<div class="decoration__subtitle text-16">Использование бонусного счёта:</div>
+																<input type="number" name="bonus" class="decoration__input text-16" placeholder="Сумма списания бонусов*">
+															</div>
+														</div>
+														<div class="decoration__pay">
+															<div class="decoration__subtitle text-16 bonus lk">Войти в личный кабинет</div>
+															<div class="decoration__subtitle text-16 bonus">УСЛОВИЯ ДОСТАВКИ</div>
+															<div class="decoration__subtitle text-16 bonus">УСЛОВИЯ ОБМЕНА И ВОЗВРАТА</div>
+															<div class="decoration__subtitle text-16 bonus last">ИНФОРМАЦИЯ ОБ ОПЛАТЕ</div>
+															<div class="decoration__calc">
+																<div class="decoration__calc-item">
+																	<div class="decoration__calc-text text-16">ДОСТАВКА:</div>
+																	<div class="decoration__calc-value text-16">По тарифам перевозчика</div>
+																</div>
+																<div class="decoration__calc-item">
+																	<div class="decoration__calc-text text-16">БОНУСЫ:</div>
+																	<div class="decoration__calc-value text-16">-69 грн</div>
+																</div>
+																<div class="decoration__calc-item">
+																	<div class="decoration__calc-text text-16">ИТОГО:</div>
+																	<div class="decoration__calc-value text-16">15250 грн</div>
+																</div>
+															</div>
+															<button class="decoration__button text-16">ОФОРМИТЬ ЗАКАЗ</button>
+															<div class="decoration__oferta text-14">Нажимая на кнопку «оплатить заказ», я принимаю условия <a href="#">публичной оферты</a> и <a href="#">политики конфиденциальности</a></div>
+														</div>
+													</div>
+												</form>
+											</div>
+										</div>{% else %}
+										<div class="cart__null null">
+											<div class="null__img">
+												<div class="null__icon icon-cart"></div>
+											</div>
+											<div class="null__data">
+												<div class="null__text text-20">В корзине нет товаров</div>
+												<div class="null__subinfo">
+													<div class="null__subtext text-14">Перейдите в каталог, чтобы добавить товары в корзину</div>
+													<a href="{% url 'catalog' %}" class="null__button">Перейти</a>
+												</div>
+											</div>
+										</div>{% endif %}
+									</div>
+								</div>{% endblock body %}
+
+

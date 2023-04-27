@@ -1,0 +1,15 @@
+{% extends 'clothes/base.html' %}{% block content %}
+		<div class="main2">
+			<div class="container">
+				<div class="main2__body">
+					<div class="main2__navigation navigation">
+						<div class="navigation__list">{% block breadcrumbs %}
+							<a href="{% url 'home' %}" class="navigation__li">Главная
+								<span class="navigation__row icon-row"></span>
+							</a>{% endblock %}
+						</div>
+					</div>
+					{% block body %}{% endblock body %}
+				</div>
+			</div>
+		</div>{% endblock %}
