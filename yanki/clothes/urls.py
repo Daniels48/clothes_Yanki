@@ -22,6 +22,8 @@ urlpatterns = [
                   path("authenticate/", AuthenticateMixin.as_view(), name="authenticate"),
                   path("currency/", Currency.as_view(), name="authenticate"),
                   path("like/", Like.as_view(), name="like"),
+                  path("about_info/", ClothesAbout.as_view(), name="about"),
+
 
               ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

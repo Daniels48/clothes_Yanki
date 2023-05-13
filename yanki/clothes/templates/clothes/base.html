@@ -46,7 +46,7 @@
 					<div class="header__nav {% if not head_title %} _othercolor {% endif %}">
 						<a data-da="burger__item three,last,992,header__link,burger__subitem" href="/catalog/new/" class="header__link text-18">NEW</a>
 						<a data-da="burger__item four,last,992,header__link,burger__subitem" href="{% url 'catalog' %}" class="header__link text-18">КАТАЛОГ</a>
-						<a data-da="burger__item five,last,992,header__link,burger__subitem" href="#" class="header__link text-18">О НАС</a>
+						<a data-da="burger__item five,last,992,header__link,burger__subitem" href="{% url 'about' %}" class="header__link text-18">О НАС</a>
 					</div>
 					<div class="header__title">
 						<a href="{% url 'home' %}" class="title icon-logo {% if not head_title %} _maincolor {% endif %}"></a>

@@ -101,5 +101,10 @@ class ClothesFavorite(GeneralMixin, ListView):
         return {**context}
 
 
+class ClothesAbout(GeneralMixin, ListView):
+    model = Product
+    template_name = "clothes/o_nas.html"
+
+
 def pageNotFound(request, exception):
     return HttpResponseNotFound('dappes')
