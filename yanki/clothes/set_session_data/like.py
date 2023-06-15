@@ -1,5 +1,4 @@
 from django.views import View
-
 from clothes.others import decode_json, json_response
 from clothes.utils import get_selected_products, get_finished_products
 from yanki.settings import LIKE_SESSION_ID

@@ -33,8 +33,11 @@
 																	<span class="text-16">{{ obj.cart }}</span>
 																	<button type="button" {% if obj.max %} disabled {% endif %} class="cart__plus icon-plus {% if obj.max %} non_enter {% endif %}"></button>
 																</div>
-																<div class="cart__price text-16 _price">{{obj.f_price}} {{sign}}</div>
-																<div class="lds-roller">
+																<div class="cart__price_container">
+																	<div class="cart__price text-16 _price">
+																		{{obj.f_price}} {{sign}}
+																	</div>
+																	<div class="lds-roller">
 																	<div></div>
 																	<div></div>
 																	<div></div>
@@ -43,6 +46,7 @@
 																	<div></div>
 																	<div></div>
 																	<div></div>
+																</div>
 																</div>
 																<button type="button" data-da="!cart__data; cart__part3,last,767.98" class="cart__delete icon-delete"></button>
 															</div>
@@ -52,18 +56,20 @@
 												</div>{% endfor %}
 											</div>
 											<div class="cart__itog">
-												<div class="cart__itog-text text-16">К оплате:</div>
-												<div class="cart__itog-sum text-16">{{cart_sum}} {{sign}}</div>
-												<div class="lds-roller">
-																	<div></div>
-																	<div></div>
-																	<div></div>
-																	<div></div>
-																	<div></div>
-																	<div></div>
-																	<div></div>
-																	<div></div>
-																</div>
+												<div class="cart__itogcontainer">
+													<div class="cart__itog-text text-16">К оплате:</div>
+													<div class="cart__itog-sum text-16">{{cart_sum}} {{sign}}</div>
+													<div class="lds-roller">
+														<div></div>
+														<div></div>
+														<div></div>
+														<div></div>
+														<div></div>
+														<div></div>
+														<div></div>
+														<div></div>
+													</div>
+												</div>
 											</div>
 											<div class="cart__decoration decoration">
 												<div class="decoration__title text-20">Оформление заказа</div>
@@ -159,7 +165,7 @@
 																				<div class="decoration__circle">
 																					<div class="decoration__point"></div>
 																				</div>
-																				<div class="decoration__radio-text text-16">Денежным переводом Visa/MasterCard <img src="http://127.0.0.1:8000/media/image/icons/Visa.jpg"></img> <img src="http://127.0.0.1:8000/media/image/icons/Master.jpg"></img></div>
+																				<div class="decoration__radio-text text-16">Денежным переводом Visa/MasterCard <img src="/media/image/icons/Visa.jpg"> <img src="/media/image/icons/Master.jpg"></div>
 																			</div>
 																		</div>
 																	</div>

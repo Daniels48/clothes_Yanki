@@ -88,14 +88,12 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
 
-
                 # "clothes.context_processors.settings",
                 # "clothes.context_processors.appointment_form",
                 # "clothes.context_processors.courses_categories",
             ],
             'builtins': [
-                'clothes.templatetags.clothes_tags',
-
+                # 'clothes.templatetags.clothes_tags',
             ],
         },
     },

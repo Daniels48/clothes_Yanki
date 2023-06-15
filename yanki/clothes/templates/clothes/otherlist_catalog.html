@@ -1,0 +1,197 @@
+{% extends 'clothes/otherlist_breadcrumbs.html' %}{% block breadcrumbs %}{{block.super}}
+					<a href="{% url 'catalog' %}" class="navigation__li">Каталог
+						<span class="navigation__row icon-row"></span>
+					</a>{% if category %}
+					<a href="{{ category.get_absolute_url }}" class="navigation__li">{{ category.title }}
+						<span class="navigation__row icon-row"></span>
+					</a>{% endif %}{% endblock %}{% block body %}
+					<div class="main2__subbody">
+						<div class="main2__catalog">
+							<div class="main2__link">
+								<div class="main2__linkin">
+									<div class="main2__sublinkin">
+										<div class="main2__linkin-title text-20">Каталог</div>
+										<span class="main2__row-linkin icon-row"></span>
+									</div>
+								</div>
+							</div>
+							<div data-da="main2__link,1,767.98" class="main2__list">{% for obj in catalog %}
+								<a href="{{ obj.get_absolute_url }}" class="main2__sublink text-16">{{obj.title}}</a>{% endfor %}
+								<a href="#" class="main2__sublink text-16">Просмотреть всё <span class="icon-row"></span></a>
+							</div>
+						</div>
+						<div class="main2__catalog-body">
+							<div class="main2__filtr filtr">
+								<form action="{{request.path}}" method="GET" class="form__filter">
+									<div class="filter__mobile mobile-filter">
+										<div class="mobile-filter__title">Фильтры
+											<span class="mobile-filter__filter icon-filtr"></span>
+										</div>
+										<div class="mobile-filter__row icon-row"></div>
+									</div>
+									<div class="filter__box">
+										<div class="filter__item size">
+											<div class="filter__head">
+												<div class="filter__title">Размер</div>
+												<span class="icon-row"></span>
+											</div>
+											<div class="filter__body size">
+												<div class="filter__container">{% for item in size %}
+													<div data-id="{{item.title | upper }}" class="filter__subitem size filter-size">
+														<div class="filter-size__text">{{item.title | upper}}</div>
+														<div class="filter-size__btn">✓</div>
+													</div>{% endfor %}
+												</div>
+												<div class="filter__item filter__box-buttons">
+													<div class="filter__buttons-wrapper">
+														<button type="submit" class="filter__buttons filter__enter">Применить</button>
+														<button type="reset" class="filter__buttons filter__reload">Сбросить</button>
+													</div>
+												</div>
+												<input type="text" class="unview" name="size">
+											</div>
+										</div>
+										<div class="filter__item color">
+											<div class="filter__head">
+												<div class="filter__title">Цвет</div>
+												<span class="icon-row"></span>
+											</div>
+											<div class="filter__body color">
+												<div class="filter__container">{% for item in color %}
+													<div data-id="{{item.hex}}" class="filter__subitem color">
+														<div class="filter__boxs">
+															<div class="filter__active">
+																<div class="filter__color" style="{% if item.hex == '#ffffff' %}border: 1px solid #676767;{% endif %} background: {{item.hex}};"></div>
+															</div>
+															<div class="filter__color-text text-18">{{item.title}}</div>
+														</div>
+														<div class="filter-size__btn">✓</div>
+													</div>{% endfor %}
+												</div>
+												<div class="filter__item filter__box-buttons">
+													<div class="filter__buttons-wrapper">
+														<button type="submit" class="filter__buttons filter__enter">Применить</button>
+														<button type="reset" class="filter__buttons filter__reload">Сбросить</button>
+													</div>
+												</div>
+												<input type="text" class="unview" name="color">
+											</div>
+										</div>
+										<div class="filter__item price">
+											<div class="filter__head">
+												<div class="filter__title">Цена</div>
+												<span class="icon-row"></span>
+											</div>
+											<div class="filter__body range-slider">
+												<div class="filter__container">
+													<div class="filter__subitem range-slider__item">
+														<div class="range-slider__range"></div>
+													</div>
+													<div class="filter__subitem range-slider__item">
+														<div class="filter__subsubitem">
+															<div class="range-slider__text">от</div>
+															<input class="range-slider__input input-min" name="min" type="text">
+															<div class="range-slider__money">{{sign}}</div>
+														</div>
+														<div class="filter__subsubitem">
+															<div class="range-slider__text">до</div>
+															<input class="range-slider__input input-max" name="max" type="text">
+															<div class="range-slider__money">{{sign}}</div>
+														</div>
+													</div>
+												</div>
+												<div data-da="filter__box,last,767.9" class="filter__item filter__box-buttons btn">
+													<div class="filter__buttons-wrapper">
+														<button type="submit" class="filter__buttons filter__enter">Применить</button>
+														<button type="reset" class="filter__buttons filter__reload">Сбросить</button>
+													</div>
+												</div>
+											</div>
+										</div>
+										<div class="filter__item sort">
+											<div class="filter__head">
+												<div class="filter__title">Сортировать по</div>
+												<span class="icon-row"></span>
+											</div>
+											<div class="filter__body sort">
+												<div class="filter__container sort">
+													<div data-id="upprice" class="filter__subitem sort filter-sort">
+														<div class="filter-sort__text">Возростанию цены</div>
+														<div class="list-size__btn">
+															<div class="list-size__circle"></div>
+														</div>
+													</div>
+													<div data-id="lowprice" class="filter__subitem sort filter-sort">
+														<div class="filter-sort__text">Убыванию цены</div>
+														<div class="list-size__btn">
+															<div class="list-size__circle"></div>
+														</div>
+													</div>
+													<div data-id="new" class="filter__subitem sort filter-sort">
+														<div class="filter-sort__text">Новинкам</div>
+														<div class="list-size__btn">
+															<div class="list-size__circle"></div>
+														</div>
+													</div>
+												</div>
+												<div class="filter__item filter__box-buttons">
+													<div class="filter__buttons-wrapper">
+														<button type="reset" class="filter__buttons filter__reload">Сбросить</button>
+													</div>
+												</div>
+											</div>
+										</div>
+									</div>
+								</form>
+							</div>
+
+							<div class="main2__products">{% for item in object_list %}
+								<div data-price="{{ item.parent.price }}" data-like="{{item.parent.id}}" class="main2__item">
+									<a href="{{ item.parent.get_absolute_url }}" class="main2__img">
+										<img src="{{ item.image.url }}" alt="img">
+										<span class="{% if item.like %} icon-like_n {% else %} icon-like_m {% endif %} like_add"></span>
+									</a>
+									<div class="main2__content-text">
+										<a href="{{ item.parent.get_absolute_url }}" class="main2__title text-16">{{ item.parent.title }}</a>
+										<div class="main2__price text-16 _price">{{ item.f_price }}</div>
+										<div class="lds-roller">
+											<div></div>
+											<div></div>
+											<div></div>
+											<div></div>
+											<div></div>
+											<div></div>
+											<div></div>
+											<div></div>
+										</div>
+										<div class="main2__size size">
+											<ul class="size__list">{% for size in item.size.title %}
+												<li class="size__li text-16">{{ size }}</li>{% endfor %}
+											</ul>
+										</div>
+										<div class="main2__color color">
+											<ul class="color__list">{% for color in item.color.hex %}
+												<li class="color__li" style="background: {{ color }}; {% if color == '#ffffff' %}border: 1px solid #252525;{% endif %}"></li>{% endfor %}
+											</ul>
+										</div>
+										<div class="main2__span">{% for tags in item.parent.tags.all %}
+											<span class="text-16">{{ tags.title }}</span>{% endfor %}
+										</div>
+									</div>
+								</div>{% endfor %}
+								<div class="load">
+									<div class="load__body">
+										<div class="load__lds-ring">
+											<div></div>
+											<div></div>
+											<div></div>
+											<div></div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>{% endblock body %}
+
+
+

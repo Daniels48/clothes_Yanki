@@ -1,0 +1,15 @@
+{% extends 'clothes/otherlist_base.html' %}{% block content %}
+		<div class="main2">
+			<div class="container">
+				<div class="main2__body">{% block catalog %}
+					<div class="search__query">
+						<div class="search__querytext">По запросу «{{ search_query }}» найдено</div>
+						<div class="search__headcount">
+							<div class="search__count">98 031</div>
+							<div class="search__text">товаров</div>
+						</div>
+					</div>{% endblock catalog %}
+					{% block body %}{% endblock body %}
+				</div>
+			</div>
+		</div>{% endblock %}

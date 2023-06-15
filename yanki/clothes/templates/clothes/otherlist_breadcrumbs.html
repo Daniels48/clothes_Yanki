@@ -1,0 +1,11 @@
+{% extends 'clothes/otherlist_base.html' %}{% block content %}
+					{% block catalog %}
+					<div class="main2__navigation navigation">
+						<div class="navigation__list">{% block breadcrumbs %}
+							<a href="{% url 'home' %}" class="navigation__li">Главная
+								<span class="navigation__row icon-row"></span>
+							</a>{% endblock %}
+						</div>
+					</div>{% endblock catalog %}
+					{% block body %}{% endblock body %}
+

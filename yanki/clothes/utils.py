@@ -102,7 +102,7 @@ def get_catalog_products(category, filters):
 
 
 def get_list_category():
-    return Catalog.objects.all().only("title", "slug").union(Tag.objects.all().only("title", "slug")).order_by("title")
+    return Tag.objects.all().only("title", "slug").union(Catalog.objects.all().only("title", "slug"), all=True)
 
 
 def get_product(name):

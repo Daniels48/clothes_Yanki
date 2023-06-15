@@ -9,8 +9,6 @@ def set_items(data, request):
     set_cart(data, request)
     set_currency(data, request)
     set_like(data, request)
-    x = request.session
-    print(x.get("like"), x.get("currency"), x.get("cart"))
     return request
 
 

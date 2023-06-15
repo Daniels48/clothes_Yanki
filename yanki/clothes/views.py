@@ -1,10 +1,11 @@
 from django.http import HttpResponseNotFound
 from django.views.generic import DetailView, ListView
 from yanki.settings import SITE_NAME
+from clothes.models import *
 from .set_session_data.cart import get_list_cart, Cart
 from .set_session_data.currency import set_currency_for_page, get_all_sum_or_one
 from .set_session_data.like import get_list_favorite, set_like_cls_for_product
-from .utils import *
+from .utils import GeneralMixin, get_catalog_products, get_list_category, get_product, get_list_for_product
 
 
 class ClothesHome(GeneralMixin, ListView):
@@ -85,6 +86,7 @@ class ClothesCart(Cart, GeneralMixin, ListView):
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
         context["cart_sum"] = get_all_sum_or_one(self.request)
+        context["title"] = "Корзина"
         return context
 
 

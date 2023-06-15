@@ -2,7 +2,7 @@ from django.contrib.auth import login
 from django.db.models import Q
 from django.http import JsonResponse
 from django.views import View
-from clothes.authenticate.send_data import data
+from clothes.utilits.authenticate.send_data import data
 from clothes.others import decode_json
 from clothes.services.email import send_activate_email_message
 from users.models import User

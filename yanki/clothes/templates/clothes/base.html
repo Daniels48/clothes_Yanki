@@ -9,7 +9,7 @@
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
 	<title>{{ title }}</title>
-	<link rel="stylesheet" href="{% static 'clothes/css/381.css' %}">
+	<link rel="stylesheet" href="{% static 'clothes/css/397.css' %}">
 	<link rel="shortcut icon" href="{% static 'clothes/icons/icons.svg' %}" type="image/x-icon" />
 </head>
 
@@ -22,23 +22,31 @@
 						<div class="burger__icon {% if not head_title %} _maincolor {% endif %}"><span></span></div>
 						<nav class="burger__menu {% if not head_title %} _maincolor2 {% endif %}">
 							<div class="burger__menu-wrapper">
-								<div class="burger__item one">
+								<div class="burger__navigate">
 								</div>
-								<div class="burger__item two">
-								</div>
-								<div class="burger__item three">
-								</div>
-								<div class="burger__item four">
-								</div>
-								<div class="burger__item five">
-								</div>
-								<div class="burger__item six">
-								</div>
-								<div class="burger__item seven">
+								<div class="burger__items">
+									<div class="burger__item two">
+									</div>
+									<div class="burger__item three">
+									</div>
+									<div class="burger__item four">
+									</div>
+									<div class="burger__item five">
+									</div>
+									<div class="burger__item six">
+										<a href="#" class="burger__subitem text-18">Условия возврата</a>
+									</div>
+									<div class="burger__item seven">
+										<a href="#" class="text-20 burger__subitem">КОНТАКТЫ</a>
+									</div>
 								</div>
 								<div class="burger__footer">
 									<div class="burger__footer-item">
+										<a href="#" class="social__subitem icon-inst burger__footer-subitem"></a>
+										<a href="#" class="social__subitem icon-tel burger__footer-subitem"></a>
 									</div>
+									<a href='tel:789500963644' class="social__item footer__subitem text-16 burger__footer-item">+78(950) 096 36 44</a>
+									<a href="mailto:info@yanki.com" class="social__item footer__subitem text-16 burger__footer-item">info@yanki.com</a>
 								</div>
 							</div>
 						</nav>
@@ -67,7 +75,7 @@
 								<input type="text" class="change__input unview" name='lang' value="ru">
 							</form>
 						</div>
-						<div data-da="burger__item one,last,767.9,header__subbox,burger__form" class="header__subbox money change">
+						<div data-da="burger__navigate,last,767.9,header__subbox,burger__form" class="header__subbox money change">
 							<button type='button' class="change__btn {% if not head_title %} _othercolor {% endif %}">{{ currency }}
 								<span class="change__row icon-rowa"></span>
 							</button>
@@ -85,11 +93,21 @@
 						<a href="{% url 'favorite' %}" class="header__item icon-like_m favorite"></a>
 						<a href="{% url 'cart' %}" class="header__item icon-cart cart">{% if cart_count > 0 %}<span>{{ cart_count }}</span>{% endif %}</a>
 					</div>
-					<div data-da="burger__item one,first,767.9,header__search,burger__search burger__form" class="header__search search">
-						<form action="#" class="search__form" name="search__form">
-							<input name="search" type="text" value="" class="search__input" placeholder="Введите ваш запрос">
+					<div data-da="burger__navigate,first,767.9,header__search,burger__search burger__form" class="header__search search">
+						<form action="/search/" class="search__form" name="search__form" autocomplete="off">
+							<input name="query" type="text" value="" class="search__input" placeholder="Введите ваш запрос">
 							<button type="submit" class="search__sbmt icon-search"></button>
 						</form>
+						<div class="header__subsearch unview">
+							<div class="searchsub__container">
+								<div data-da="burger__menu-wrapper,2,767.98,,unview" class="searchsub__items">
+									<div class="searchsub__products">
+									</div>
+									<div class="searchsub__categorys">
+									</div>
+								</div>
+							</div>
+						</div>
 					</div>
 					{% if head_title %}
 					<div class="title-text">
@@ -131,31 +149,31 @@
 					<div class="footer__item one">
 						<span class="footer_row icon-row"></span>
 						<div class="footer__title text-20">КОМПАНИЯ</div>
-						<a href="#" class="footer__subitem text-16">О нас</a>
+						<a href="/about_info/" class="footer__subitem text-16">О нас</a>
 						<a href="#" class="footer__subitem text-16">Контакты</a>
 					</div>
 					<div class="footer__item two">
 						<span class="footer_row icon-row"></span>
 						<div class="footer__title text-20">ПОЛЕЗНОЕ</div>
 						<a href="#" class="footer__subitem text-16">Оплата и доставка</a>
-						<a data-da="burger__item six,last,767.9,footer__subitem,burger__subitem,burger__icon,_burger" href="#" class="footer__subitem text-16">Условия возврата</a>
+						<a href="#" class="footer__subitem text-16">Условия возврата</a>
 						<a href="#" class="footer__subitem text-16">Бонусная система</a>
 					</div>
 					<div class="footer__item three">
 						<span class="footer_row icon-row"></span>
 						<div class="footer__title text-20">ПОКУПАТЕЛЮ</div>
-						<a href="#" class="footer__subitem text-16">Избранное</a>
+						<a href="/favorite/" class="footer__subitem text-16">Избранное</a>
 						<a href="#" class="footer__subitem text-16">Публичная оферта</a>
 						<a href="#" class="footer__subitem text-16">Политика конфиденциальности</a>
 					</div>
 					<div class="footer__item four social">
-						<a data-da="burger__item seven,last,767.9,social__title,burger__subitem,burger__icon,_burger" href="#" class="social__title text-20">КОНТАКТЫ</a>
+						<a href="#" class="social__title text-20">КОНТАКТЫ</a>
 						<div class="footer__subitem social__item one">
-							<a data-da="burger__footer-item,first,767.9,,burger__footer-subitem,burger__icon,_burger" href="#" class="social__subitem icon-inst"></a>
-							<a data-da="burger__footer-item,last,767.9,,burger__footer-subitem,burger__icon,_burger" href="#" class="social__subitem icon-tel"></a>
+							<a href="#" class="social__subitem icon-inst"></a>
+							<a href="#" class="social__subitem icon-tel"></a>
 						</div>
-						<a data-da="burger__footer,1,767.9,,burger__footer-item,burger__icon,_burger" href='tel:380730963644' class="social__item footer__subitem text-16">+38(073) 096 36 44</a>
-						<a data-da="burger__footer,last,767.9,,burger__footer-item,burger__icon,_burger" href="mailto:info@yanki.com" class="social__item footer__subitem text-16">info@yanki.com</a>
+						<a href='tel:789500963644' class="social__item footer__subitem text-16">+78(950) 096 36 44</a>
+						<a href="mailto:info@yanki.com" class="social__item footer__subitem text-16">info@yanki.com</a>
 					</div>
 				</div>
 				<p class="footer__copy-right">©️ 2021 Yanki. All rights reserved</p>
@@ -166,7 +184,7 @@
 	<script src="{% static 'clothes/js/jquery-3.6.2.min.js' %}" type="text/javascript"></script>
 	<script src="{% static 'clothes/js/slick.min.js' %}" type="text/javascript"></script>
 	<script src="{% static 'clothes/js/nouislider.min.js' %}" type="text/javascript"></script>
-	<script src="{% static 'clothes/js/888.js' %}" type="text/javascript"></script>
+	<script src="{% static 'clothes/js/213.js' %}" type="text/javascript"></script>
 </body>
 
 </html>

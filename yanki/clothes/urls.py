@@ -2,11 +2,13 @@ from django.conf.urls.static import static
 from django.contrib.auth.views import LogoutView
 from django.urls import path, include
 from yanki import settings
-from .authenticate.authenticate import AuthenticateMixin
+from clothes.utilits.authenticate.authenticate import AuthenticateMixin
 from .set_session_data.Others import Set_local_data
 from .set_session_data.currency import Currency
 from .set_session_data.like import Like
+from .utilits.GlobalSearch import ClothesSearch
 from .views import *
+
 
 urlpatterns = [
                   path("", ClothesHome.as_view(), name="home"),
@@ -20,6 +22,7 @@ urlpatterns = [
                   path("cart/", ClothesCart.as_view(), name="cart"),
                   path("session/", Set_local_data.as_view(), name="session"),
                   path("authenticate/", AuthenticateMixin.as_view(), name="authenticate"),
+                  path("search/", ClothesSearch.as_view(), name="search"),
                   path("currency/", Currency.as_view(), name="authenticate"),
                   path("like/", Like.as_view(), name="like"),
                   path("about_info/", ClothesAbout.as_view(), name="about"),

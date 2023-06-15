@@ -11,6 +11,84 @@ window.onload = function () {
 	/* 	document.addEventListener("mouseover", (e) => { const obj = e.target });
 		document.addEventListener("mouseout", (e) => { const obj = e.target }); */
 
+	const head_search = document.querySelector(".search__input");
+
+	head_search.addEventListener("keyup", search_ajax);
+
+	async function search_ajax(e) {
+		const inp_value = head_search.value;
+		const cls_unview = "unview"
+		const cls = "searchsub__item";
+		const element_search = document.querySelector(`.${cls}s`);
+		const element_products = element_search.firstElementChild;
+		const element_category = element_search.lastElementChild;
+		const window_width = window.screen.width;
+
+		if (inp_value) {
+			const url = `http://${window.location.host}/search/`;
+			const request = {};
+			request["global_search"] = inp_value;
+			const response = send_data_on_server(request, url);
+			await get_data_in_promise(response, true_response, false_response)
+		} else {
+			clear__elements();
+			unview_elements("add");
+		}
+
+		function true_response(raw_data) {
+			clear__elements();
+			const products = raw_data.products;
+
+			if (products.length) {
+				unview_elements("remove");
+				append_elements(products, element_products);
+				const category = raw_data.category;
+				append_elements(category, element_category);
+			} else { unview_elements("add") }
+		}
+
+		function false_response(e) {
+		}
+
+		function unview_elements(method) {
+			if (window_width > 767) { element_search.parentNode.parentNode.classList[method](cls_unview) }
+			else {
+				const antimethod = method == "add" ? "remove" : "add";
+				element_search.classList[method](cls_unview); document.querySelector(".burger__items").classList[antimethod](cls_unview);
+			}
+		}
+
+		function append_elements(list_objects, destination) {
+			list_objects.forEach(elem => { destination.insertAdjacentHTML("beforeEnd", get_html_elements(elem)) })
+		}
+
+		function get_html_elements(elem) {
+			if (elem.img) {
+				return `<a href="${elem.url}" data-category="${elem.id}" class="searchsub__category">
+										<div class="searchsub__textcategory">
+											<div class="searchsub__title text-20">${elem.title}</div>
+											<div class="searchsub__subtitle">Категория</div>
+										</div>
+										<div class="searchsub__img">
+											<img src="${elem.img}" alt="image">
+										</div>
+									</a>`;
+			} else {
+				return `<a href='${elem.url}' data-products='${elem.id}' class="${cls}">
+										<div class="searchsub__subitem">
+											<div class="searchsub__icon icon-search"></div>
+											<div class="searchsub__text">${elem.title}</div>
+										</div>
+								</a>`;
+			}
+		}
+
+		function clear__elements() {
+			element_products.innerText = "";
+			element_category.innerText = "";
+		}
+	}
+
 	document.addEventListener('click', (e) => {
 		const cls_active_element = "_active";
 		const obj = e.target;
@@ -64,8 +142,17 @@ window.onload = function () {
 
 		if (burger_icon) {
 			if (window.screen.width < 768) {
-				document.body.classList.toggle('_burger');
-				burger_icon.classList.toggle('_burger');
+				const class_burgera = "_burger";
+				const get_contains = (element, cls) => element.classList.contains(cls);
+				if (get_contains(document.body, class_burgera)) {
+					burger_icon.addEventListener("transitionend", (e) => {
+						console.log(e);
+					})
+				}
+				document.body.classList.toggle(class_burgera);
+				burger_icon.classList.toggle(class_burgera);
+
+
 			}
 		}
 
@@ -237,6 +324,7 @@ window.onload = function () {
 			const list = document.querySelectorAll(`.${class_name}`);
 			const buttons_wrapper = document.querySelector(".filter__buttons-wrapper");
 			const filter_buttons = document.querySelector(".filter__box-buttons");
+			const cls = "open_btn";
 
 			if (list) {
 				list.forEach(elem => { elem.classList.remove(class_name) })
@@ -245,7 +333,7 @@ window.onload = function () {
 			open_filter_on_mobile.classList.toggle(class_name); //head
 
 			if (filter_buttons) {
-				const cls = "open_btn";
+
 				const filtr_open = document.querySelectorAll(".open");
 				if (!get_contains_cls(filter_buttons, cls)) { filter_buttons.classList.add(cls) }
 				if (!filtr_open.length) { filter_buttons.classList.remove(cls) }
@@ -311,7 +399,7 @@ window.onload = function () {
 		//-----------------------------------------------------------------------------------------------------//
 		const footer_view_info = obj.closest(".footer_row");
 		if (footer_view_info) {
-			for (let item of footer.parentNode.children) item.classList.toggle(cls_active_element);
+			for (let item of footer_view_info.parentNode.children) item.classList.toggle(cls_active_element);
 		}
 		//-----------------------------------------------------------------------------------------------------//
 
@@ -328,7 +416,6 @@ window.onload = function () {
 				}
 
 				if (obj == head_search) {
-					console.log("daetosearch")
 					const list_class = ["header__lk", "header__change", "header__search"]
 					if (list_class.some(check_class)) {
 						elem.classList.add(cls_active_element);
@@ -714,7 +801,7 @@ window.onload = function () {
 				if (method == 'upprice') { moving_elements(products, false, false, false) }
 				if (method == 'lowprice') { moving_elements(products, true, false, false) }
 				if (method == 'new') { moving_elements(products, true, false, true) }
-				if (method == 'reload') { moving_elements(products, false, true, false) }
+				if (method == 'reload') { /* moving_elements(products, false, true, false) */reload_current_page() }
 
 			} else { install__dataProduct(list_products) }
 
@@ -783,6 +870,8 @@ window.onload = function () {
 					}
 				}
 			}
+
+			function reload_current_page() { window.location.href = location.protocol + '//' + location.host + location.pathname; }
 		}
 	}
 	//-----------------------------------------------------------------------------------------------------//
@@ -808,6 +897,7 @@ window.onload = function () {
 	function set_currency(data = false, cart = false, add = false) {
 		const selector_sum_cart = "cart__itog-sum";
 		const selector_product = "[data-price]";
+		const cls_sum = "_itog";
 		const [cls_price, cls_unview, cls_add] = ["_price", "unview", "_currency"];
 		const get_one_element_on_id = id => document.querySelector(`[data-id='${id}']`);
 		const get_element = element => element.querySelector(`.${cls_price}`);
@@ -843,7 +933,7 @@ window.onload = function () {
 
 			} else {
 				const [local_var, sign_var, old_c, new_c] = ["local", "sign", "old", "new"];
-				const defolt_currency = "UAH";
+				const default_currency = "UAH";
 				const count_round = 2;
 				const currency = data[local_var];
 				const dates = data["data"];
@@ -892,8 +982,8 @@ window.onload = function () {
 					const new_price = number => Math.round(
 						(row_price * old_value) * number / new_value * +`1e${count_round}`
 					) / +`1e${count_round}`;
-					let final_value = currency == defolt_currency ? row_price : new_price(1);
-					if (vars == "*") { final_value = currency == defolt_currency ? number : new_price(get_value(element)) };
+					let final_value = currency == default_currency ? row_price : new_price(1);
+					if (vars == "*") { final_value = currency == default_currency ? number : new_price(get_value(element)) };
 					return set_price_for_product(get_element(element), final_value, sign)
 				}
 			}
@@ -911,7 +1001,9 @@ window.onload = function () {
 		function change_elements_cls(id) {
 			const elements = id == 0 ? document.querySelectorAll(selector_product) : [get_one_element_on_id(id)];
 			if (elements.length) {
-				elements.forEach(elem => change_cls_for_animate(elem));
+				elements.forEach(elem => {
+					change_cls_for_animate(elem)
+				});
 			}
 			const sum_element = document.querySelector(`.${selector_sum_cart}`);
 			if (sum_element) {
@@ -922,8 +1014,11 @@ window.onload = function () {
 		function change_cls_for_animate(head_element) {
 			const valid_all_sum = head_element.classList.contains(selector_sum_cart);
 			const element = valid_all_sum ? head_element : get_element(head_element);
-			const anim = element.nextElementSibling;
-			element.classList.toggle(cls_unview);
+			const anim = element.nextElementSibling ? element.nextElementSibling : element.parentNode.nextElementSibling;
+			if (valid_all_sum) {
+				element.classList.toggle(cls_sum);
+				element.previousElementSibling.classList.toggle(cls_sum);
+			} else { element.classList.toggle(cls_unview); }
 			anim.classList.toggle(cls_add);
 		}
 	}
@@ -1001,7 +1096,7 @@ window.onload = function () {
 			//1(required) - destination (class_list, id) //example "asd ddd" or #fsf413313
 			//2(required) - place (first, other int, last)//3(required) - width (width) //example 1210
 			//4(non required) - class_delete (class_list)//5(non required) - class_add (class_list)
-			//6(non required) - class_contains (when you click)
+			//6(non required) - class_contains elements click (when you click)//7(non required) - class contains(when you click)
 			const selector_search = "da";
 			const types = "max"; //max or min;
 			const selector_old_position = 'old';
@@ -1118,32 +1213,28 @@ window.onload = function () {
 									if (id) { return document.getElementById(id) }
 								} else {
 									const class_list = selector.match(/[\w-]+/g).join(".");
-									if (class_list) { return document.querySelector("." + class_list); }
+									if (class_list) { return document.querySelector("." + class_list) }
 								}
 							}
 						}
 
 						function moving_element(parent, place, element) {
-							if (place == 'last') { parent.append(element); }
-							else if (place == 'first') { parent.prepend(element); }
-							else { parent.children[place - 1].after(element); }
+							if (place == 'last') { parent.append(element) }
+							else if (place == 'first') { parent.prepend(element) }
+							else { parent.children[place - 1].after(element) }
 						}
 
 						function delete_class(element, class_list) {
 							if (class_list) {
 								const list = class_list.split(" ");
-								list.forEach(item => {
-									if (element.classList.contains(item)) element.classList.remove(item);
-								})
+								list.forEach(item => { if (element.classList.contains(item)) element.classList.remove(item) })
 							}
 						}
 
 						function append_class(element, class_list) {
 							if (class_list) {
 								const list = class_list.split(" ");
-								list.forEach(item => {
-									if (!element.classList.contains(item)) element.classList.add(item);
-								})
+								list.forEach(item => { if (!element.classList.contains(item)) element.classList.add(item) })
 							}
 						}
 					})
@@ -1404,6 +1495,7 @@ window.onload = function () {
 	}
 	//------------------------------------------------------------------------------------------------------//
 	//localStorage.clear();
+
 
 	performed_function();
 }
