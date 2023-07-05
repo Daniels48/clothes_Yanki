@@ -118,10 +118,25 @@ LIKE_SESSION_ID = "like"
 
 SESSION_SAVE_EVERY_REQUEST = True
 
+SITE_ID = 1
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
+
+
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": "django-project",
+        "USER": "postgres",
+        "PASSWORD": "334417",
+        "HOST": "localhost",
+        "PORT": "5432",
+
     }
 }
 

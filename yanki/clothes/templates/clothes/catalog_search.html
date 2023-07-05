@@ -9,8 +9,8 @@
 									</div>
 								</div>
 							</div>
-							<div data-da="main2__link,1,767.98" class="main2__list">{% for obj in catalog %}
-								<a href="{{ obj.get_absolute_url }}" class="main2__sublink text-16">{{obj.title}}<span class="search__cnt">(23)</span></a>{% endfor %}
+							<div data-da="main2__link,1,767.98" class="main2__list">{% for key, value in list_category.items %}
+								<a href="{{ obj.get_absolute_url }}" class="main2__sublink text-16">{{key}}<span class="search__cnt">({{value}})</span></a>{% endfor %}
 								<a href="#" class="main2__sublink text-16">Просмотреть всё <span class="icon-row"></span></a>
 							</div>
 						</div>
@@ -140,14 +140,14 @@
 							</div>
 
 							<div class="main2__products">{% for item in object_list %}
-								<div data-price="{{ item.parent.price }}" data-like="{{item.parent.id}}" class="main2__item">
-									<a href="{{ item.parent.get_absolute_url }}" class="main2__img">
+								<div data-price="{{ item.price }}" data-like="{{item.id}}" class="main2__item">
+									<a href="{{ item.slug }}" class="main2__img">
 										<img src="{{ item.image.url }}" alt="img">
 										<span class="{% if item.like %} icon-like_n {% else %} icon-like_m {% endif %} like_add"></span>
 									</a>
 									<div class="main2__content-text">
-										<a href="{{ item.parent.get_absolute_url }}" class="main2__title text-16">{{ item.parent.title }}</a>
-										<div class="main2__price text-16 _price">{{ item.f_price }}</div>
+										<a href="{{ item.parent.get_absolute_url }}" class="main2__title text-16">{{ item.title }}</a>
+										<div class="main2__price text-16 _price">{{ item.price }}</div>
 										<div class="lds-roller">
 											<div></div>
 											<div></div>
@@ -168,8 +168,8 @@
 												<li class="color__li" style="background: {{ color }}; {% if color == '#ffffff' %}border: 1px solid #252525;{% endif %}"></li>{% endfor %}
 											</ul>
 										</div>
-										<div class="main2__span">{% for tags in item.parent.tags.all %}
-											<span class="text-16">{{ tags.title }}</span>{% endfor %}
+										<div class="main2__span">{% for tags in item.tags %}
+											<span class="text-16">{{ tags }}</span>{% endfor %}
 										</div>
 									</div>
 								</div>{% endfor %}
@@ -185,6 +185,7 @@
 								</div>
 							</div>
 						</div>
+						{{data}}
 					</div>{% endblock body %}
 
 
