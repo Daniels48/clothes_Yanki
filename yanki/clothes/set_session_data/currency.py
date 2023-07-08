@@ -1,5 +1,4 @@
 import re
-
 import requests
 from django.views import View
 from clothes.others import json_response, decode_json

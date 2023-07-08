@@ -4,7 +4,7 @@ from clothes.models import *
 from clothes.others import sum_products
 from clothes.set_session_data.currency import get_currency_for_page, get_list_currency, get_sign
 from clothes.utilits.Products import calc_color, get_finished_products
-from yanki.settings import CURRENCY_SESSION_ID, CART_SESSION_ID
+from yanki.settings import CURRENCY_SESSION_ID, CART_SESSION_ID, LIKE_SESSION_ID
 
 
 class GeneralDataMixin:
@@ -105,4 +105,5 @@ def get_product(name):
 def get_list_for_product():
     raw_list = get_selected_products(types="catalog")
     return get_finished_products(raw_list)
+
 

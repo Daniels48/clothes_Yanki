@@ -57,6 +57,7 @@ def get_list_favorite(request):
 
 def set_like_cls_for_product(list_product, request):
     list_like = request.session.get(LIKE_SESSION_ID, [])
+    list_like = request.session.get(LIKE_SESSION_ID, [])
     set_like = lambda x: str(x.parent.id) in list_like
 
     if type(list_product) != list:

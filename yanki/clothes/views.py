@@ -5,6 +5,7 @@ from clothes.models import *
 from .set_session_data.cart import get_list_cart, Cart
 from .set_session_data.currency import set_currency_for_page, get_all_sum_or_one
 from .set_session_data.like import get_list_favorite, set_like_cls_for_product
+from .utilits.Products import set_currency_and_like
 from .utils import GeneralMixin, get_catalog_products, get_list_category, get_product, get_list_for_product
 
 
@@ -26,8 +27,8 @@ class ClothesCatalog(GeneralMixin, ListView):
     def get_queryset(self):
         category, filters = [self.kwargs.get("category"), self.request.GET]
         products = get_catalog_products(category, filters)
-        raw_products = set_currency_for_page(products, self.request)
-        return set_like_cls_for_product(raw_products, self.request)
+        query = set_currency_and_like(products, self.request)
+        return query
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -52,6 +53,8 @@ class ClothesProduct(GeneralMixin, DetailView):
         name = self.kwargs.get("name")
         raw_product = get_product(name)
         products_currency = set_currency_for_page(raw_product, self.request)
+        # query = set_currency_and_like(raw_product, self.request)
+        # # return query
         return set_like_cls_for_product(products_currency, self.request)
 
     def get_context_data(self, *, object_list=None, **kwargs):
@@ -95,7 +98,9 @@ class ClothesFavorite(GeneralMixin, ListView):
     template_name = "clothes/favorite.html"
 
     def get_queryset(self):
-        return get_list_favorite(self.request)
+        raw_query = get_list_favorite(self.request)
+        query = set_like_cls_for_product(raw_query, self.request)
+        return query
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)

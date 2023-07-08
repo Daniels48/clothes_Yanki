@@ -25,7 +25,7 @@ window.onload = function () {
 		const window_width = window.screen.width;
 
 		if (inp_value) {
-			const url = `http://${window.location.host}/search/`;
+			const url = get_global_url('search');
 			const request = {};
 			request["global_search"] = inp_value;
 			const response = send_data_on_server(request, url);
@@ -139,6 +139,123 @@ window.onload = function () {
 			search.classList.toggle(cls_active_element);
 			input.focus();
 		}
+
+		//-----------------------------------------------------------------------------------------------------//
+
+		const search_select_category = obj.closest(".main2__sublink");
+
+		if (search_select_category) {
+			search_category(search_select_category);
+		}
+
+		async function search_category(obj) {
+			const url_btn = obj.href;
+			const cls = "_search__select";
+			const category = url_btn.split("category=")[1];
+			if (category) {
+				e.preventDefault();
+			}
+			const search_query = url_btn.split("query=")[1].split("&")[0];
+			const url = get_global_url("search");
+			const request = {};
+			request["category_search"] = category;
+			request["search_query"] = search_query;
+			const response = send_data_on_server(request, url);
+			await get_data_in_promise(response, success_fnc, false_fnc)
+
+			function success_fnc(data) {
+				const products_query = data.products;
+				const parent_products = document.querySelector(".main2__products");
+				const load_image = `<div class="load">
+										<div class="load__body">
+											<div class="load__lds-ring">
+												<div></div>
+												<div></div>
+												<div></div>
+												<div></div>
+											</div>
+										</div>
+									</div>`;
+				parent_products.innerHTML = "";
+				products_query.forEach(elem => parent_products.insertAdjacentHTML("beforeEnd", get_html(elem)));
+				sort_product();
+				parent_products.insertAdjacentHTML("beforeEnd", load_image);
+				const list_select = document.querySelectorAll(`.main2__sublink.${cls}`);
+				list_select.forEach(elem => elem.classList.remove(cls))
+				obj.classList.add(cls);
+
+				function get_html(elem) {
+					const cls_like = elem.like ? "icon-like_n" : "icon-like_m";
+					const element = `<div data-price="${elem.price}" data-like="${elem.id}" class="main2__item">
+										<a a href = "${elem.url}" class="main2__img">
+											<img src="${elem.image}" alt="img">
+											<span class="${cls_like} like_add"></span>
+										</a>
+										<div class="main2__content-text">
+											<a href="${elem.url}" class="main2__title text-16">${elem.title}</a>
+											<div class="main2__price text-16 _price">${elem.f_price}</div>
+											<div class="lds-roller">
+												<div></div>
+												<div></div>
+												<div></div>
+												<div></div>
+												<div></div>
+												<div></div>
+												<div></div>
+												<div></div>
+											</div>
+											<div class="main2__size size">
+												<ul class="size__list">
+													${get_size_list(elem.size)}
+												</ul>
+											</div>
+											<div class="main2__color color">
+												<ul class="color__list">
+													${get_color_list(elem.color)}
+												</ul>
+											</div>
+											<div class="main2__span">
+												${get_tags_list(elem.tag)}
+											</div>
+										</div>
+									</div>`;
+					return element;
+
+					function get_size_list(list_elem) {
+						const html_outer = element => `<li class="size__li text-16">${element}</li>`;
+						const list = [];
+						list_elem.forEach(elem => list.push(html_outer(elem)))
+						return list.join(" ");
+					}
+
+					function get_color_list(list_elem) {
+						const html_outer = (element, style) => `<li class="color__li" style="background: ${element}${style}"></li>`;
+						const list = [];
+						list_elem.forEach(elem => {
+							const slyle_elem = elem == "#ffffff" ? "; border: 1px solid #252525;" : "";
+							list.push(html_outer(elem, slyle_elem))
+						})
+						return list.join(" ");
+					}
+
+					function get_tags_list(list_elem) {
+						const html_outer = element => `<span class="text-16">${element}</span>`;
+						const list = [];
+						list_elem.forEach(elem => {
+							list.push(html_outer(elem))
+						})
+						return list.join(" ");
+					}
+				}
+			}
+
+			function false_fnc() {
+			}
+
+
+		}
+
+		//-----------------------------------------------------------------------------------------------------//
 
 		if (burger_icon) {
 			if (window.screen.width < 768) {
@@ -804,6 +921,16 @@ window.onload = function () {
 				if (method == 'reload') { /* moving_elements(products, false, true, false) */reload_current_page() }
 
 			} else { install__dataProduct(list_products) }
+
+
+			function change_loading_image() {
+				const load = document.querySelector(".load");
+				load.classList.toggle(selector_sort);
+				setTimeout(() => {
+					products.forEach(element => { element.parentNode.append(element) })
+					load.classList.toggle(selector_sort);
+				}, time_animation)
+			}
 
 			function moving_elements(products, lower = false, old_position = false, new_s) {
 				const load = document.querySelector(".load");

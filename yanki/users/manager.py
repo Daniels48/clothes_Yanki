@@ -27,6 +27,8 @@ class UserManager(BaseUserManager):
 
             user = self.model(username=username, phone=phone, **extra_fields)
 
+        user = self.model(username=username, **extra_fields)
+
         # yavlyaets9 polzovatel superuser
         if extra_fields.get("is_superuser"):
             user = self.model(username=username, **extra_fields)
