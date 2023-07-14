@@ -8,86 +8,71 @@ window.onload = function () {
 	const global_like = "like";
 	const global_delay = 1200;
 
-	/* 	document.addEventListener("mouseover", (e) => { const obj = e.target });
-		document.addEventListener("mouseout", (e) => { const obj = e.target }); */
-
 	const head_search = document.querySelector(".search__input");
 
-	head_search.addEventListener("keyup", search_ajax);
+	const container_search_keyup = document.querySelector(".searchsub__products");
 
-	async function search_ajax(e) {
-		const inp_value = head_search.value;
-		const cls_unview = "unview"
-		const cls = "searchsub__item";
-		const element_search = document.querySelector(`.${cls}s`);
-		const element_products = element_search.firstElementChild;
-		const element_category = element_search.lastElementChild;
-		const window_width = window.screen.width;
+	container_search_keyup.addEventListener("mouseover", set_settings_mouseover_for_search_keyup);
+	container_search_keyup.addEventListener("mouseout", clear_settings_mouseout_for_search_keyup);
 
-		if (inp_value) {
-			const url = get_global_url('search');
-			const request = {};
-			request["global_search"] = inp_value;
-			const response = send_data_on_server(request, url);
-			await get_data_in_promise(response, true_response, false_response)
-		} else {
-			clear__elements();
-			unview_elements("add");
-		}
 
-		function true_response(raw_data) {
-			clear__elements();
-			const products = raw_data.products;
+	function set_settings_mouseover_for_search_keyup(e) {
+		const obj = e.target
+		const element_enter = obj.closest(".searchsub__item");
 
-			if (products.length) {
-				unview_elements("remove");
-				append_elements(products, element_products);
-				const category = raw_data.category;
-				append_elements(category, element_category);
-			} else { unview_elements("add") }
-		}
+		if (element_enter) {
+			const cls = "_keyup_enter";
+			let old_element_enter = document.querySelector(`[data-isenter="True"]`);
 
-		function false_response(e) {
-		}
-
-		function unview_elements(method) {
-			if (window_width > 767) { element_search.parentNode.parentNode.classList[method](cls_unview) }
-			else {
-				const antimethod = method == "add" ? "remove" : "add";
-				element_search.classList[method](cls_unview); document.querySelector(".burger__items").classList[antimethod](cls_unview);
+			if (!old_element_enter) {
+				old_element_enter = head_search;
+				old_element_enter.dataset.isenter = "True";
 			}
+
+			old_element_enter.classList.remove(cls);
+			old_element_enter.dataset.isenter = "False";
+
+			element_enter.dataset.isenter = "True";
+			element_enter.classList.add(cls);
 		}
 
-		function append_elements(list_objects, destination) {
-			list_objects.forEach(elem => { destination.insertAdjacentHTML("beforeEnd", get_html_elements(elem)) })
-		}
+	}
 
-		function get_html_elements(elem) {
-			if (elem.img) {
-				return `<a href="${elem.url}" data-category="${elem.id}" class="searchsub__category">
-										<div class="searchsub__textcategory">
-											<div class="searchsub__title text-20">${elem.title}</div>
-											<div class="searchsub__subtitle">Категория</div>
-										</div>
-										<div class="searchsub__img">
-											<img src="${elem.img}" alt="image">
-										</div>
-									</a>`;
-			} else {
-				return `<a href='${elem.url}' data-products='${elem.id}' class="${cls}">
-										<div class="searchsub__subitem">
-											<div class="searchsub__icon icon-search"></div>
-											<div class="searchsub__text">${elem.title}</div>
-										</div>
-								</a>`;
-			}
-		}
+	function clear_settings_mouseout_for_search_keyup(e) {
+		const n_obj = e.relatedTarget.closest(".searchsub__item");
 
-		function clear__elements() {
-			element_products.innerText = "";
-			element_category.innerText = "";
+		if (!n_obj) {
+			const cls = "_keyup_enter";
+			const enter_element = document.querySelector(`.${cls}`);
+			enter_element.classList.remove(cls);
+			enter_element.dataset.isenter = "False";
+			head_search.dataset.isenter = "True";
 		}
 	}
+
+
+	/* els.addEventListener("mouseout", (e) => {
+		const obj = e.target
+		console.log(obj, "out")
+	}); */
+
+
+
+	document.addEventListener("unload", function () {
+		const url = window.location.href.split("?");
+		if (url[1]) { this.localStorage.removeItem("filters") }
+	});
+
+	/* document.addEventListener("keyup", enter_keyup)
+
+	async function enter_keyup(e) {
+		const obj = e.target;
+		if (obj.classList.contains("search__input")) { search_keyup(e) }
+
+	} */
+
+	head_search.addEventListener("keyup", search_keyup);
+
 
 	document.addEventListener('click', (e) => {
 		const cls_active_element = "_active";
@@ -145,118 +130,10 @@ window.onload = function () {
 		const search_select_category = obj.closest(".main2__sublink");
 
 		if (search_select_category) {
-			search_category(search_select_category);
-		}
-
-		async function search_category(obj) {
-			const url_btn = obj.href;
-			const cls = "_search__select";
-			const category = url_btn.split("category=")[1];
-			if (category) {
-				e.preventDefault();
-			}
-			const search_query = url_btn.split("query=")[1].split("&")[0];
-			const url = get_global_url("search");
-			const request = {};
-			request["category_search"] = category;
-			request["search_query"] = search_query;
-			const response = send_data_on_server(request, url);
-			await get_data_in_promise(response, success_fnc, false_fnc)
-
-			function success_fnc(data) {
-				const products_query = data.products;
-				const parent_products = document.querySelector(".main2__products");
-				const load_image = `<div class="load">
-										<div class="load__body">
-											<div class="load__lds-ring">
-												<div></div>
-												<div></div>
-												<div></div>
-												<div></div>
-											</div>
-										</div>
-									</div>`;
-				parent_products.innerHTML = "";
-				products_query.forEach(elem => parent_products.insertAdjacentHTML("beforeEnd", get_html(elem)));
-				sort_product();
-				parent_products.insertAdjacentHTML("beforeEnd", load_image);
-				const list_select = document.querySelectorAll(`.main2__sublink.${cls}`);
-				list_select.forEach(elem => elem.classList.remove(cls))
-				obj.classList.add(cls);
-
-				function get_html(elem) {
-					const cls_like = elem.like ? "icon-like_n" : "icon-like_m";
-					const element = `<div data-price="${elem.price}" data-like="${elem.id}" class="main2__item">
-										<a a href = "${elem.url}" class="main2__img">
-											<img src="${elem.image}" alt="img">
-											<span class="${cls_like} like_add"></span>
-										</a>
-										<div class="main2__content-text">
-											<a href="${elem.url}" class="main2__title text-16">${elem.title}</a>
-											<div class="main2__price text-16 _price">${elem.f_price}</div>
-											<div class="lds-roller">
-												<div></div>
-												<div></div>
-												<div></div>
-												<div></div>
-												<div></div>
-												<div></div>
-												<div></div>
-												<div></div>
-											</div>
-											<div class="main2__size size">
-												<ul class="size__list">
-													${get_size_list(elem.size)}
-												</ul>
-											</div>
-											<div class="main2__color color">
-												<ul class="color__list">
-													${get_color_list(elem.color)}
-												</ul>
-											</div>
-											<div class="main2__span">
-												${get_tags_list(elem.tag)}
-											</div>
-										</div>
-									</div>`;
-					return element;
-
-					function get_size_list(list_elem) {
-						const html_outer = element => `<li class="size__li text-16">${element}</li>`;
-						const list = [];
-						list_elem.forEach(elem => list.push(html_outer(elem)))
-						return list.join(" ");
-					}
-
-					function get_color_list(list_elem) {
-						const html_outer = (element, style) => `<li class="color__li" style="background: ${element}${style}"></li>`;
-						const list = [];
-						list_elem.forEach(elem => {
-							const slyle_elem = elem == "#ffffff" ? "; border: 1px solid #252525;" : "";
-							list.push(html_outer(elem, slyle_elem))
-						})
-						return list.join(" ");
-					}
-
-					function get_tags_list(list_elem) {
-						const html_outer = element => `<span class="text-16">${element}</span>`;
-						const list = [];
-						list_elem.forEach(elem => {
-							list.push(html_outer(elem))
-						})
-						return list.join(" ");
-					}
-				}
-			}
-
-			function false_fnc() {
-			}
-
-
+			change_products_for_search(search_select_category, false, false);
 		}
 
 		//-----------------------------------------------------------------------------------------------------//
-
 		if (burger_icon) {
 			if (window.screen.width < 768) {
 				const class_burgera = "_burger";
@@ -418,6 +295,7 @@ window.onload = function () {
 		const choice__color = obj.closest(".filter__subitem.color");
 		const reset_filters = obj.closest(".filter__reload");
 		const sort_products = obj.closest(".filter__subitem.sort");
+		const enter_filters = obj.closest(".filter__enter.filter__buttons");
 
 		if (open_catalog_on_mobile) {
 			const cls_catalog = "_catalog";
@@ -468,13 +346,20 @@ window.onload = function () {
 
 		}
 
-		if (choice__size) { choice__size.classList.toggle("choice"); input_installValue(choice__size) }
-		if (choice__color) { choice__color.classList.toggle("choice"); input_installValue(choice__color) }
+		if (choice__size) { choice__size.classList.toggle("choice"); input_installValue(choice__size, "size") }
+		if (choice__color) { choice__color.classList.toggle("choice"); input_installValue(choice__color, "color") }
+
+
+		if (enter_filters) {
+			enter_and_get_url_filters();
+		}
+		//------------------------------------------------------------------------------------------------------//
 
 		if (reset_filters) {
 			const choices = document.querySelectorAll(".choice");
 			if (choices.length) { choices.forEach(elem => elem.classList.remove("choice")) }
 			sort_product('reload');
+			localStorage.removeItem("filters");
 			if (location.search) { location.search = "" }
 		}
 
@@ -559,7 +444,392 @@ window.onload = function () {
 		if (select) {
 			if (!obj.closest(".info-product__choose-box")) { select.classList.remove("_enter") }
 		}
+
+
+		async function change_products_for_search(obj, isEnter_filters, url_set) {
+			const is_search = "search";
+			const isNotEmptyFilters = window.location.href.match(/\?(.+)/);
+			const head_url = window.location.href.split(`/${is_search}/`)[1];
+
+			if (head_url && isNotEmptyFilters) {
+				e.preventDefault();
+				const request = get_request(obj, isEnter_filters);
+				const url = get_global_url(is_search);
+				const response = send_data_on_server(request, url);
+				await get_data_in_promise(response, success_fnc, false_fnc)
+
+				function success_fnc(data) {
+					const products_query = data.products;
+					const list_category = data.category;
+
+					if (isEnter_filters) {
+						const sum = data.sum;
+						const element_sum = document.querySelector(".search__count");
+						element_sum.innerText = sum;
+						set_category(list_category);
+					} else {
+						const cls = "_search__select";
+						const list_select = document.querySelectorAll(`.main2__sublink.${cls}`);
+						list_select.forEach(elem => elem.classList.remove(cls))
+						obj.classList.add(cls);
+						set_url_no_reload(obj.href);
+					}
+
+					set_products(products_query);
+				}
+
+				function set_category(list) {
+					const parent_category = document.querySelector(".main2__list");
+					parent_category.innerHTML = "";
+					for (let key in list) {
+						const data = list[key];
+						if ((data.enter && key == "Все") || data.who) {
+							set_url_no_reload(data.url);
+						}
+						parent_category.insertAdjacentHTML("beforeEnd", get_html(key, list[key]))
+					}
+
+
+
+
+					function get_html(key, value) {
+						const cls = (value.enter && key == "Все") || value.who ? " _search__select" : ""
+						const element = `<a href="${value.url}" class="main2__sublink text-16${cls}" data-url="${value.url}">${key}
+									<span class="search__cnt">(${value.count})</span>
+								</a>`
+						return element;
+					}
+				}
+
+				function set_products(products_query) {
+					const parent_products = document.querySelector(".main2__products");
+					const load_image = `<div class="load">
+											<div class="load__body">
+												<div class="load__lds-ring">
+													<div></div>
+													<div></div>
+													<div></div>
+													<div></div>
+												</div>
+											</div>
+										</div>`;
+					parent_products.innerHTML = "";
+					products_query.forEach(elem => parent_products.insertAdjacentHTML("beforeEnd", get_html(elem)));
+					sort_product();
+					parent_products.insertAdjacentHTML("beforeEnd", load_image);
+
+					function get_html(elem) {
+						const cls_like = elem.like ? "icon-like_n" : "icon-like_m";
+						const element = `<div data-price="${elem.price}" data-like="${elem.id}" class="main2__item">
+										<a a href = "${elem.url}" class="main2__img">
+											<img src="${elem.image}" alt="img">
+											<span class="${cls_like} like_add"></span>
+										</a>
+										<div class="main2__content-text">
+											<a href="${elem.url}" class="main2__title text-16">${elem.title}</a>
+											<div class="main2__price text-16 _price">${elem.f_price}</div>
+											<div class="lds-roller">
+												<div></div>
+												<div></div>
+												<div></div>
+												<div></div>
+												<div></div>
+												<div></div>
+												<div></div>
+												<div></div>
+											</div>
+											<div class="main2__size size">
+												<ul class="size__list">
+													${get_size_list(elem.size)}
+												</ul>
+											</div>
+											<div class="main2__color color">
+												<ul class="color__list">
+													${get_color_list(elem.color)}
+												</ul>
+											</div>
+											<div class="main2__span">
+												${get_tags_list(elem.tag)}
+											</div>
+										</div>
+									</div>`;
+						return element;
+
+						function get_size_list(list_elem) {
+							const html_outer = element => `<li class="size__li text-16">${element}</li>`;
+							const list = [];
+							list_elem.forEach(elem => list.push(html_outer(elem)))
+							return list.join(" ");
+						}
+
+						function get_color_list(list_elem) {
+							const html_outer = (element, style) => `<li class="color__li" style="background: ${element}${style}"></li>`;
+							const list = [];
+							list_elem.forEach(elem => {
+								const slyle_elem = elem == "#ffffff" ? "; border: 1px solid #252525;" : "";
+								list.push(html_outer(elem, slyle_elem))
+							})
+							return list.join(" ");
+						}
+
+						function get_tags_list(list_elem) {
+							const html_outer = element => `<span class="text-16">${element}</span>`;
+							const list = [];
+							list_elem.forEach(elem => { list.push(html_outer(elem)) })
+							return list.join(" ");
+						}
+					}
+				}
+
+				function false_fnc() {
+				}
+			}
+
+			function get_request(obj, filters) {
+				if (filters) {
+					const request = {};
+					for (let key in filters) {
+						const value = filters[key];
+						request[key] = value;
+					}
+					return request
+				}
+				const request = get_url_filters(obj)
+				return request
+			}
+		}
+
+		//-----------------------------------------click_function------------------------------------------------//
+		function input_installValue(element, value) {
+			const name_item = "filters"
+			const filters = get_localItem(name_item) ? get_localItem(name_item) : {};
+			if (!filters) {
+				filters[value] = [element.dataset.id,];
+				set_localItem(filters, name_item);
+			} else {
+				if (value in filters) {
+					let old_value = filters[value];
+					const enter_value = element.dataset.id;
+					const index = old_value.indexOf(enter_value);
+					if (index === -1) { old_value.push(enter_value); }
+					else { old_value.splice(index, 1) }
+					filters[value] = old_value;
+					set_localItem(filters, name_item);
+				} else { filters[value] = [element.dataset.id,]; set_localItem(filters, name_item); }
+
+				if (filters[value].length == 0) { delete filters[value] };
+				const isNotEmpty = Object.entries(filters).length !== 0;
+				if (!isNotEmpty) { localStorage.removeItem(name_item) }
+				else { set_localItem(filters, name_item) };
+			}
+
+		}
+
+		function enter_and_get_url_filters() {
+			e.preventDefault();
+			const full_filters = get_full_filters();
+			const isNotEmpty = Object.entries(full_filters).length !== 0;
+
+			if (isNotEmpty) {
+				const is_search = "/search/";
+				const head_url = window.location.href.split(is_search)[1];
+
+				if (head_url) {
+					//const list_category = document.querySelectorAll(".main2__sublink");
+					const list_filters = get_filtered_filters(full_filters);
+					const string_added_filters = get_string_filters(list_filters) == "" ? "" : "&" + get_string_filters(list_filters);
+					change_products_for_search(false, get_full_filters(), string_added_filters);
+
+				} else {
+					const string_filters = get_string_filters(get_full_filters());
+					const string_query = `?${string_filters}`;
+					change_url(string_query);
+				}
+			}
+
+
+			function get_full_filters() {
+				const name_item = "filters";
+				const min = document.querySelector(".input-min");
+				const max = document.querySelector(".input-max");
+				const filters = get_localItem(name_item) ? get_localItem(name_item) : {};
+				const max_price = get_localItem("max_price");
+
+				if (parseInt(min.value) != 0) { filters["min"] = parseInt(min.value) }
+				else { delete filters["min"] };
+				if (parseInt(max.value) != max_price) { filters["max"] = parseInt(max.value) }
+				else { delete filters["max"] };
+
+				set_localItem(filters, name_item);
+
+				return filters;
+			}
+
+			function get_filtered_filters(obj) {
+				const list_filters = obj;
+				delete list_filters["query"];
+				delete list_filters["category"];
+				return list_filters;
+			}
+
+			function get_string_filters(obj) {
+				const list_query = [];
+				for (let key in obj) {
+					const value = ["min", "max"].indexOf(key) == -1 ? obj[key].join(",") : obj[key];
+					list_query.push(`${key}=${value}`);
+				}
+				return list_query.join("&")
+			}
+
+			function change_url(list_filters) {
+				window.location.href = list_filters;
+			}
+
+			/* 			if (search) {
+							const url = window.location.href.split("?");
+							const search = url[1].match(/query=/);
+							const query = [];
+							for (let key in filters) {
+								const value = filters[key].join(",");
+								const string = `${key}=${value}`;
+								query.push(string);
+							}
+							const final_url = window.location.href;
+							const query_url = query.join("&");
+							const list_url = [final_url, query_url]
+							console.log(list_url.join("&"));
+							set_url_no_reload(list_url.join("&"));
+						} else {
+							
+						} */
+		}
 	});
+
+	async function search_keyup(e) {
+		const inp_value = head_search.value;
+		const cls_unview = "unview"
+		const cls = "searchsub__item";
+		const element_search = document.querySelector(`.${cls}s`);
+		const element_products = element_search.firstElementChild;
+		const element_category = element_search.lastElementChild;
+		const window_width = window.screen.width;
+
+
+		const key = e.key;
+		const list_key = ["ArrowDown", "ArrowUp"];
+		const list_tabs = document.querySelectorAll("[data-index]");
+
+		if (list_key.includes(key) && list_tabs.length) {
+			let element_enter = document.querySelector(`[data-isenter="True"]`)
+
+			if (!element_enter) {
+				element_enter = head_search;
+				element_enter.dataset.isenter = "True";
+			}
+
+
+			const index = element_enter.dataset.index;
+
+			if (list_key[0] == key) {
+				const next_index = Number(index) + 1;
+				let next_element = document.querySelector(`[data-index="${next_index}"]`)
+				if (!next_element) { next_element = head_search }
+				set_settings(next_element);
+
+			} else {
+				const prev_index = Number(index) - 1;
+				const max_index = head_search.dataset.max_index;
+				let prev_element = document.querySelector(`[data-index="${prev_index}"]`)
+				if (!prev_element) { prev_element = document.querySelector(`[data-index="${max_index}"]`) }
+				set_settings(prev_element);
+			}
+
+			function set_settings(element) {
+				const cls = "_keyup_enter";
+				const value_input = element.dataset.input;
+				head_search.value = value_input;
+
+				element_enter.dataset.isenter = "False";
+				element_enter.classList.remove(cls);
+
+				if (element != head_search) {
+					element.classList.add(cls);
+				}
+
+				element.dataset.isenter = "True";
+			}
+		} else {
+			if (inp_value) {
+				const url = get_global_url('search');
+				const request = {};
+				request["keyup_search"] = inp_value;
+				const response = send_data_on_server(request, url);
+				await get_data_in_promise(response, true_response, false_response)
+			} else {
+				clear__elements();
+				unview_elements("add");
+			}
+		}
+
+
+		function true_response(raw_data) {
+			clear__elements();
+			const products = raw_data.products;
+			const enter_value = raw_data.enter_value;
+			const max_index = raw_data.max_index;
+			head_search.dataset.index = 0;
+			head_search.dataset.input = enter_value;
+			head_search.dataset.max_index = max_index;
+
+			if (products.length) {
+				unview_elements("remove");
+				append_elements(products, element_products);
+				const category = raw_data.category;
+				append_elements(category, element_category);
+			} else { unview_elements("add") }
+		}
+
+		function false_response(e) {
+		}
+
+		function unview_elements(method) {
+			if (window_width > 767) { element_search.parentNode.parentNode.classList[method](cls_unview) }
+			else {
+				const antimethod = method == "add" ? "remove" : "add";
+				element_search.classList[method](cls_unview); document.querySelector(".burger__items").classList[antimethod](cls_unview);
+			}
+		}
+
+		function append_elements(list_objects, destination) {
+			list_objects.forEach(elem => { destination.insertAdjacentHTML("beforeEnd", get_html_elements(elem)) })
+		}
+
+		function get_html_elements(elem) {
+			if (elem.img) {
+				return `<a href="${elem.url}" data-category="${elem.id}" class="searchsub__category">
+										<div class="searchsub__textcategory">
+											<div class="searchsub__title text-20">${elem.title}</div>
+											<div class="searchsub__subtitle">Категория</div>
+										</div>
+										<div class="searchsub__img">
+											<img src="${elem.img}" alt="image">
+										</div>
+									</a>`;
+			} else {
+				return `<a href='${elem.url}' data-products='${elem.id}' class="${cls}" data-index="${elem.index}" data-isenter="False" data-input="${elem.input}">
+										<div class="searchsub__subitem">
+											<div class="searchsub__icon icon-search"></div>
+											<div class="searchsub__text">${elem.title}</div>
+										</div>
+								</a>`;
+			}
+		}
+
+		function clear__elements() {
+			element_products.innerText = "";
+			element_category.innerText = "";
+		}
+	}
 
 	//-------------------------------------------authenticate-------------------------------------------------//
 	async function aunthetification(type, button_next = false) {
@@ -1033,6 +1303,12 @@ window.onload = function () {
 
 		if (data) {
 			const get_finally_value = (value, sign) => `${value} ${sign}`;
+			const max_range_value = Number(data.data.max_price);
+			set_localItem(max_range_value, "max_price");
+			const url = window.location.href;
+			const start = url.match(/min=(\d+)/) ? url.match(/min=(\d+)/)[1] : 0;
+			const finsih = url.match(/max=(\d+)/) ? url.match(/max=(\d+)/)[1] : max_range_value;
+			change_slider(start, finsih, max_range_value);
 
 			if (cart) {
 				const sum_cart = data["sum_cart"];
@@ -1411,39 +1687,37 @@ window.onload = function () {
 				})
 			}
 		}
-		//-------------------------------------------RangeSlider------------------------------------------------//
+		//-----------------------------------------RangeSlider-----------------------------------------------//
 		function RangeSlider() {
 			const rangeSlider = document.querySelector(".range-slider__range");
 			const rangeMin = document.querySelector(".input-min");
 			const rangeMax = document.querySelector(".input-max");
 			const rangeInputs = [rangeMin, rangeMax];
-
 			if (rangeSlider || rangeMin || rangeMax) {
+				const max_range_value = Number(rangeMax.dataset.value);
+				set_localItem(max_range_value, "max_price");
 				noUiSlider.create(rangeSlider, { // инициализируем слайдер
-					start: [0, 99999], // устанавливаем начальные значения
+					start: [0, max_range_value], // устанавливаем начальные значения
 					connect: true, // указываем что нужно показывать выбранный диапазон
+					padding: [0, 0],
 					range: { // устанавливаем минимальное и максимальное значения
 						'min': [0],
-						'max': [99999]
+						'max': [max_range_value]
 					},
-					step: 100, // шаг изменения значений
-				}
-				)
-
+					step: 1, // шаг изменения значений
+				})
 				rangeSlider.noUiSlider.on('update', function (values, handle) { // при изменений положения элементов управления слайдера изменяем соответствующие значения
 					rangeInputs[handle].value = parseInt(values[handle]);
 				});
-
 				rangeMin.addEventListener('change', function () { // при изменении меньшего значения в input - меняем положение соответствующего элемента управления
 					rangeSlider.noUiSlider.set([this.value, null]);
 				});
-
 				rangeMax.addEventListener('change', function () { // при изменении большего значения в input - меняем положение соответствующего элемента управления
 					rangeSlider.noUiSlider.set([null, this.value]);
 				});
+
 			}
 		}
-
 		dinamicAdaptiv();
 		GallerySlider();
 		RangeSlider();
@@ -1499,7 +1773,9 @@ window.onload = function () {
 		promise.catch(err => { return error(err) });
 	}
 
-	function get_global_url(category) { return `http://${window.location.host}/${category}/` }
+	function get_global_url(category) {
+		return `http://${window.location.host}/${category}/`
+	}
 
 	async function others_func_for_send_and_receive_data(request, url, func_true, func_false) {
 		const response = send_data_on_server(request, url);
@@ -1544,27 +1820,60 @@ window.onload = function () {
 	}
 
 	function check_url_for_set_filters() {
-		const raw_str = location.href.match(/\?(.+)/);
-		if (raw_str) {
-			const signs = ["&", "%2C"];
-			const cls = "choice"
-			const list = ["color", "size"]
-			const list_finally = {};
-			const list_params = raw_str[1].split(signs[0]);
-			list_params.forEach(elem => {
-				const elems = elem.split("=");
-				if (elems[0] == list[0]) { elems[1] = elems[1].replace(/%23/g, "#") };
-				list_finally[elems[0]] = elems[1].split(signs[1]);
-			});
-			for (let item in list_finally) {
-				const list_items = list_finally[item];
-				if (list_items[0] && list.indexOf(item) != -1) {
-					list_items.forEach(elem => { document.querySelector(`[data-id="${elem}"]`).classList.add(cls) });
-				} else { }
+		const isNotEmptyFilters = window.location.href.match(/\?(.+)/);
+		const name_item = "filters";
+		localStorage.removeItem(name_item);
+		const max_value = get_localItem("max_price");
+		const list_value_slider = [0, max_value, max_value];
+
+		if (isNotEmptyFilters) {
+			const filters = {};
+			const cls = "choice";
+			const list_params = get_url_filters(false, true);
+			const list_price = ["min", "max"];
+			const list_clr_sz = ["color", "size"];
+
+			for (let key in list_params) {
+				const values = list_params[key];
+				filters[key] = values;
+
+				if (list_clr_sz.indexOf(key) != -1) {
+					values.forEach(elem => { document.querySelector(`[data-id="${elem}"]`).classList.add(cls) });
+				}
+
+				if (list_price.indexOf(key) != -1) {
+					const index = list_price.indexOf(key);
+					list_value_slider[index] = Number(values);
+				};
 			}
 
+
+			set_localItem(filters, name_item);
+			change_slider(...list_value_slider);
 		}
 	}
+
+	function get_url_filters(obj, head_mode = false) {
+		const url_head = head_mode ? decodeURI(window.location.href) : decodeURI(obj.href);
+		const dict_filters = {}
+		const list_filters_params = ["query", "category", "size", "min", "max", "color"];
+
+		list_filters_params.forEach(string => {
+			const rgxp = new RegExp(`${string}=(.+)`);
+			const r_query = url_head.match(rgxp);
+			if (r_query) {
+				const raw_value = r_query[1].split("&")[0];
+				let f_value = raw_value;
+				if (["category", "max", "min"].indexOf(string) == -1) {
+					const str_split = string == "query" ? "+" : ",";
+					f_value = f_value.split(str_split);
+				}
+				dict_filters[string] = f_value;
+			}
+		})
+		return dict_filters;
+	}
+
 	//------------------------------------------------------------------------------------------------------//
 
 	//----------------------------------------localstorage--------------------------------------------------//
@@ -1577,6 +1886,10 @@ window.onload = function () {
 		const item = localStorage.getItem(name);
 		if (item === null) { return false }
 		else { return JSON.parse(item) }
+	}
+
+	function set_url_no_reload(url) {
+		window.history.pushState(null, null, decodeURI(url))
 	}
 	//------------------------------------------------------------------------------------------------------//
 
@@ -1596,29 +1909,26 @@ window.onload = function () {
 	}
 	//------------------------------------------------------------------------------------------------------//
 
+	//-------------------------------------------RangeSlider------------------------------------------------//
+
+	function change_slider(start_v, finish_v, max_range) {
+		const rangeSlider = document.querySelector(".range-slider__range");
+		rangeSlider.noUiSlider.updateOptions({
+			start: [start_v, finish_v], // устанавливаем начальные значения
+			range: { // устанавливаем минимальное и максимальное значения
+				'min': [0],
+				'max': [max_range]
+			}
+		});
+	}
+
 	//-----------------------------------function_for_sum_all_performed_functions---------------------------//
 	function performed_function() {
 		init_select_Product();
-		check_url_for_set_filters();
 		check_and_init_session();
 		general();
 		sort_product();
-	}
-	//------------------------------------------------------------------------------------------------------//
-
-	//-----------------------------------------click_function------------------------------------------------//
-	function input_installValue(element) {
-		const input = element.closest(".filter__body").querySelector("input.unview");
-		if (!input.value) {
-			input.value = element.dataset.id;
-		} else {
-			const list_choices = input.value.split(",");
-			const index = list_choices.indexOf(element.dataset.id);
-
-			if (index !== -1) { list_choices.splice(index, 1) }
-			else { list_choices.push(element.dataset.id) }
-			input.value = list_choices.join(",");
-		}
+		check_url_for_set_filters();
 	}
 	//------------------------------------------------------------------------------------------------------//
 	//localStorage.clear();

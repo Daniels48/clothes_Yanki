@@ -2,7 +2,7 @@ from clothes.others import json_response, get_cart_for_local
 from re import findall
 from clothes.models import Product
 from clothes.others import decode_json, get_int_count, sum_products
-from clothes.set_session_data.currency import send_local_data, get_local_data_for_cart, get_all_sum_or_one
+from clothes.set_session_data.currency import get_local_data_for_cart, get_all_sum_or_one
 from clothes.utils import get_selected_products
 from yanki.settings import CART_SESSION_ID, CURRENCY_SESSION_ID
 

@@ -9,7 +9,7 @@
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
 	<title>{{ title }}</title>
-	<link rel="stylesheet" href="{% static 'clothes/css/398.css' %}">
+	<link rel="stylesheet" href="{% static 'clothes/css/400.css' %}">
 	<link rel="shortcut icon" href="{% static 'clothes/icons/icons.svg' %}" type="image/x-icon" />
 </head>
 
@@ -95,16 +95,14 @@
 					</div>
 					<div data-da="burger__navigate,first,767.9,header__search,burger__search burger__form" class="header__search search">
 						<form action="/search/" class="search__form" name="search__form" autocomplete="off">
-							<input name="query" type="text" value="" class="search__input" placeholder="Введите ваш запрос">
+							<input name="query" type="text" data-index="0" data-isenter=True class="search__input" placeholder="Введите ваш запрос">
 							<button type="submit" class="search__sbmt icon-search"></button>
 						</form>
 						<div class="header__subsearch unview">
 							<div class="searchsub__container">
 								<div data-da="burger__menu-wrapper,2,767.98,,unview" class="searchsub__items">
-									<div class="searchsub__products">
-									</div>
-									<div class="searchsub__categorys">
-									</div>
+									<div class="searchsub__products"></div>
+									<div class="searchsub__categorys"></div>
 								</div>
 							</div>
 						</div>

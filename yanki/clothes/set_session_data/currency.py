@@ -1,6 +1,9 @@
 import re
+from math import ceil
 import requests
+from django.db.models import Max
 from django.views import View
+from clothes.models import BaseProduct
 from clothes.others import json_response, decode_json
 from yanki.settings import CURRENCY_SESSION_ID, CART_SESSION_ID
 
@@ -476,8 +479,12 @@ def get_valute(value):
 def send_local_data(request):
     currency = get_currency_for_page(request)
     old_value, new_value = get_valute(currency)
+    sign = get_sign(currency)
+    value_sign = old_value / new_value if sign != "грн" else 1
+    query = BaseProduct.objects.aggregate(Max('price'))
+    raw_value = int(query["price__max"]) * value_sign
     return {"local": currency,
-           "data": {"new": new_value, "old": old_value, "sign": currency_list[currency]}}
+           "data": {"new": new_value, "old": old_value, "sign": currency_list[currency], "max_price": ceil(raw_value)}}
 
 
 def get_number(number):
@@ -518,4 +525,6 @@ def get_local_data_for_cart(request, id_product):
     all_sum = get_all_sum_or_one(request) if cart else 0
     sum_product = 0 if sign == "delete" else get_all_sum_or_one(request, id_product)
     return {"sum_cart": all_sum, "product": {"id": id_product, "sum": sum_product, "sign": get_sign(currency)}}
+
+
 

@@ -10,8 +10,7 @@
 								</div>
 							</div>
 							<div data-da="main2__link,1,767.98" class="main2__list">{% for key, value in list_category.items %}
-								<a href="{{ value.url }}" class="main2__sublink text-16 {% if key == 'Все' %} _search__select {% endif %}">{{key}}
-									<span class="search__cnt">({{value.count}})</span>
+								<a href="{{ value.url }}" class="main2__sublink text-16 {% if key == 'Все' and value.enter %}_search__select{% elif value.who %}_search__select{% endif %}" data-url="{{ value.url }}">{{key}}<span class="search__cnt">({{value.count}})</span>
 								</a>{% endfor %}
 								<a href="#" class="main2__sublink text-16">Просмотреть всё <span class="icon-row"></span></a>
 							</div>
@@ -54,7 +53,7 @@
 											</div>
 											<div class="filter__body color">
 												<div class="filter__container">{% for item in color %}
-													<div data-id="{{item.hex}}" class="filter__subitem color">
+													<div data-id="{{item.id}}" class="filter__subitem color">
 														<div class="filter__boxs">
 															<div class="filter__active">
 																<div class="filter__color" style="{% if item.hex == '#ffffff' %}border: 1px solid #676767;{% endif %} background: {{item.hex}};"></div>
@@ -91,7 +90,7 @@
 														</div>
 														<div class="filter__subsubitem">
 															<div class="range-slider__text">до</div>
-															<input class="range-slider__input input-max" name="max" type="text">
+															<input data-value="{{max}}" class="range-slider__input input-max" name="max" type="text">
 															<div class="range-slider__money">{{sign}}</div>
 														</div>
 													</div>

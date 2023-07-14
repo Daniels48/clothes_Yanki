@@ -58,7 +58,7 @@
 											</div>
 											<div class="filter__body color">
 												<div class="filter__container">{% for item in color %}
-													<div data-id="{{item.hex}}" class="filter__subitem color">
+													<div data-id="{{item.id}}"  class="filter__subitem color">
 														<div class="filter__boxs">
 															<div class="filter__active">
 																<div class="filter__color" style="{% if item.hex == '#ffffff' %}border: 1px solid #676767;{% endif %} background: {{item.hex}};"></div>
@@ -95,7 +95,7 @@
 														</div>
 														<div class="filter__subsubitem">
 															<div class="range-slider__text">до</div>
-															<input class="range-slider__input input-max" name="max" type="text">
+															<input data-value="{{max}}" class="range-slider__input input-max" name="max" type="text">
 															<div class="range-slider__money">{{sign}}</div>
 														</div>
 													</div>
@@ -144,7 +144,6 @@
 									</div>
 								</form>
 							</div>
-
 							<div class="main2__products">{% for item in object_list %}
 								<div data-price="{{ item.parent.price }}" data-like="{{item.parent.id}}" class="main2__item">
 									<a href="{{ item.parent.get_absolute_url }}" class="main2__img">
