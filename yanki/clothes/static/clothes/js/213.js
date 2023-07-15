@@ -635,7 +635,6 @@ window.onload = function () {
 				const head_url = window.location.href.split(is_search)[1];
 
 				if (head_url) {
-					//const list_category = document.querySelectorAll(".main2__sublink");
 					const list_filters = get_filtered_filters(full_filters);
 					const string_added_filters = get_string_filters(list_filters) == "" ? "" : "&" + get_string_filters(list_filters);
 					change_products_for_search(false, get_full_filters(), string_added_filters);
@@ -685,23 +684,6 @@ window.onload = function () {
 				window.location.href = list_filters;
 			}
 
-			/* 			if (search) {
-							const url = window.location.href.split("?");
-							const search = url[1].match(/query=/);
-							const query = [];
-							for (let key in filters) {
-								const value = filters[key].join(",");
-								const string = `${key}=${value}`;
-								query.push(string);
-							}
-							const final_url = window.location.href;
-							const query_url = query.join("&");
-							const list_url = [final_url, query_url]
-							console.log(list_url.join("&"));
-							set_url_no_reload(list_url.join("&"));
-						} else {
-							
-						} */
 		}
 	});
 
@@ -1303,12 +1285,16 @@ window.onload = function () {
 
 		if (data) {
 			const get_finally_value = (value, sign) => `${value} ${sign}`;
-			const max_range_value = Number(data.data.max_price);
-			set_localItem(max_range_value, "max_price");
-			const url = window.location.href;
-			const start = url.match(/min=(\d+)/) ? url.match(/min=(\d+)/)[1] : 0;
-			const finsih = url.match(/max=(\d+)/) ? url.match(/max=(\d+)/)[1] : max_range_value;
-			change_slider(start, finsih, max_range_value);
+
+			try {
+				const max_range_value = Number(data.data.max_price);
+				set_localItem(max_range_value, "max_price");
+				const url = window.location.href;
+				const start = url.match(/min=(\d+)/) ? url.match(/min=(\d+)/)[1] : 0;
+				const finsih = url.match(/max=(\d+)/) ? url.match(/max=(\d+)/)[1] : max_range_value;
+				change_slider(start, finsih, max_range_value);
+			} catch { }
+
 
 			if (cart) {
 				const sum_cart = data["sum_cart"];

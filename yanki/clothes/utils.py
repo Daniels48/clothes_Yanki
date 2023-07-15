@@ -23,8 +23,8 @@ class GeneralMixin(GeneralDataMixin):
     """General mixin for provide authenticate and currency"""
 
 
-def get_raw_union_products(request):
-    return Product.objects.distinct().select_related("parent", "parent__type", "size", "color")
+def get_raw_union_products():
+    return Product.objects.select_related("parent", "parent__type", "size", "color")
 
 
 def get_selected_products(filters=False, types=False, request=False):
@@ -32,7 +32,7 @@ def get_selected_products(filters=False, types=False, request=False):
                       "id", "parent__type__slug", "size__title", "color__hex"]
     list_fields = {"cart": ["image_1", "count"], "catalog": ["image", "parent__tags__title"]}
     general_fields.extend(list_fields.get(types))
-    raw_list = get_raw_union_products(request)
+    raw_list = get_raw_union_products()
     if not filters:
         filters = {}
 
@@ -104,7 +104,7 @@ def get_product(name, request):
         [(lst.append(obj), lst_raw.append(obj.color.id)) for obj in lst_objs if obj.color.id not in lst_raw]
         return sorted(lst, key=lambda obj: calc_color(obj.color.hex), reverse=True)
 
-    list_products = get_raw_union_products(request).filter(parent__slug=name)
+    list_products = get_raw_union_products().filter(parent__slug=name)
     list_products[0].colors = get_colors_product(list_products)
     list_products[0].sizes = get_sizes_product(list_products)
     list_products[0].care = re_context("care", list_products[0])
