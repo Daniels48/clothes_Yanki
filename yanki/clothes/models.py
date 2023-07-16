@@ -101,3 +101,5 @@ class Color(models.Model):
         verbose_name = "Цвет"
         verbose_name_plural = "Цвета"
         ordering = ['id']
+
+

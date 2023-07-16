@@ -3,6 +3,7 @@ from django.contrib.auth.views import LogoutView
 from django.urls import path, include
 from yanki import settings
 from clothes.utilits.authenticate.authenticate import AuthenticateMixin
+from .forms import get_cities
 from .set_session_data.Others import Set_local_data
 from .set_session_data.currency import Currency
 from .set_session_data.like import Like
@@ -26,6 +27,7 @@ urlpatterns = [
                   path("currency/", Currency.as_view(), name="authenticate"),
                   path("like/", Like.as_view(), name="like"),
                   path("about_info/", ClothesAbout.as_view(), name="about"),
+                path("cities/", get_cities, name="cities")
 
 
               ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

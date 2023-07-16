@@ -80,12 +80,12 @@
 																<div class="decoration__subtitle text-16">Персональные данные:</div>
 																<div class="decoration__box">
 																	<div class="decoration__item">
-																		<input name="firstname" type="text" placeholder="Ваше имя*" class="decoration__input text-16">
-																		<input name="lastname" type="text" placeholder="Ваша фамилия*" class="decoration__input text-16">
+																		<input name="firstname" type="text" placeholder="Ваше имя*" class="decoration__input text-16" {% if request.user.is_authenticated %}value="{{request.user.first_name}}"{% endif %}>
+																		<input name="lastname" type="text" placeholder="Ваша фамилия*" class="decoration__input text-16" {% if request.user.is_authenticated %}value="{{request.user.last_name}}"{% endif %}>
 																	</div>
 																	<div class="decoration__item">
-																		<input name="email" type="text" placeholder="Ваш e-mail*" class="decoration__input text-16">
-																		<input name="phone" type="text" placeholder="Ваш телефон*" class="decoration__input text-16">
+																		<input name="email" type="text" placeholder="Ваш e-mail*" class="decoration__input text-16" {% if request.user.is_authenticated %}value="{{request.user.email}}"{% endif %}>
+																		<input name="phone" type="text" placeholder="Ваш телефон*" class="decoration__input text-16" {% if request.user.is_authenticated %}value="{{request.user.phone}}"{% endif %}>
 																	</div>
 																</div>
 															</div>
@@ -133,10 +133,10 @@
 																<div class="decoration__subtitle text-16">Адрес доставки:</div>
 																<div class="decoration__box">
 																	<div class="decoration__item">
-																		<input name="city" type="text" class="decoration__input text-16" placeholder="Город*">
+																		<input name="city" type="text" class="decoration__input text-16" placeholder="Город*" {% if request.user.is_authenticated %}value="{{request.user.city}}"{% endif %}>
 																	</div>
 																	<div class="decoration__item">
-																		<input name="№mail" type="text" class="decoration__input text-16" placeholder="Отделение почты*">
+																		<input name="post_office" type="text" class="decoration__input text-16" placeholder="Отделение почты*" {% if request.user.is_authenticated %}value="{{request.user.post_office}}"{% endif %}>
 																	</div>
 																</div>
 															</div>
@@ -177,8 +177,8 @@
 																<input type="number" name="bonus" class="decoration__input text-16" placeholder="Сумма списания бонусов*">
 															</div>
 														</div>
-														<div class="decoration__pay">
-															<div class="decoration__subtitle text-16 bonus lk">Войти в личный кабинет</div>
+														<div class="decoration__pay">{% if not request.user.is_authenticated %}
+															<div class="decoration__subtitle text-16 bonus lk">Войти в личный кабинет</div>{% endif %}
 															<div class="decoration__subtitle text-16 bonus">УСЛОВИЯ ДОСТАВКИ</div>
 															<div class="decoration__subtitle text-16 bonus">УСЛОВИЯ ОБМЕНА И ВОЗВРАТА</div>
 															<div class="decoration__subtitle text-16 bonus last">ИНФОРМАЦИЯ ОБ ОПЛАТЕ</div>

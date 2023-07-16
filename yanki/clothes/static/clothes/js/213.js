@@ -204,26 +204,7 @@ window.onload = function () {
 		}
 
 		if (lk_change_Info) {
-			const inputs = document.querySelectorAll("input.info");
-			const btn_input = lk_change_Info.firstElementChild;
-
-			if (btn_input.value == "ОБНОВИТЬ ИНФОРМАЦИЮ") {
-				btn_input.value = "ИЗМЕНИТЬ ИНФОРМАЦИЮ";
-				inputDisabled(true);
-			} else {
-				btn_input.value = "ОБНОВИТЬ ИНФОРМАЦИЮ";
-				event.preventDefault();
-				inputDisabled(false);
-			}
-
-			function inputDisabled(value) {
-				if (inputs) {
-					inputs.forEach(elem => {
-						elem.disabled = value;
-						elem.classList.toggle(cls_active_element);
-					});
-				}
-			}
+			change_lk_data(lk_change_Info);
 		}
 		//-----------------------------------------------------------------------------------------------------//
 
@@ -445,6 +426,49 @@ window.onload = function () {
 			if (!obj.closest(".info-product__choose-box")) { select.classList.remove("_enter") }
 		}
 
+		//---------------------------------------------change_lk------------------------------------------------//
+		async function change_lk_data(object) {
+			e.preventDefault();
+			const btn_input = object.firstElementChild;
+			const request = {};
+
+
+			if (btn_input.value == "ОБНОВИТЬ ИНФОРМАЦИЮ") {
+				inputDisabled(true);
+				const str_url = "profile/info";
+				const url = get_global_url(str_url);
+				const response = send_data_on_server(request, url);
+				await get_data_in_promise(response, success_fnc, false_fnc)
+				btn_input.value = "ИЗМЕНИТЬ ИНФОРМАЦИЮ";
+			} else {
+				btn_input.value = "ОБНОВИТЬ ИНФОРМАЦИЮ";
+				inputDisabled(false);
+			}
+
+			function success_fnc(e) {
+				console.log(e)
+			}
+
+			function false_fnc(e) {
+
+			}
+
+			function inputDisabled(value) {
+				const inputs = document.querySelectorAll("input.info");
+				if (inputs) {
+					inputs.forEach(elem => {
+						elem.disabled = value;
+						elem.classList.toggle(cls_active_element);
+						const name = elem.name;
+						if (elem.value) {
+							request[name] = elem.value;
+						}
+					});
+				}
+			}
+		}
+		//-----------------------------------------------------------------------------------------------------//
+
 
 		async function change_products_for_search(obj, isEnter_filters, url_set) {
 			const is_search = "search";
@@ -488,9 +512,6 @@ window.onload = function () {
 						}
 						parent_category.insertAdjacentHTML("beforeEnd", get_html(key, list[key]))
 					}
-
-
-
 
 					function get_html(key, value) {
 						const cls = (value.enter && key == "Все") || value.who ? " _search__select" : ""

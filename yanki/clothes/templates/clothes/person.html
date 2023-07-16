@@ -2,21 +2,21 @@
 {% block persons %} _select {% endblock persons %}
 					{% block profile %}
 								<div class="person-info">
-									<form action="$" class="person-info__form" method="POST">
+									<form class="person-info__form" method="POST">
 										<div class="person-info__item">
 											<div class="person-info__title text-16">Персональные данные:</div>
 											<div class="person-info__body">
 												<div class="person-info__subitem firstname">
-													<input class="text-16 info" name="firstname" type="text" disabled value="{{ request.user.username }}">
+													{{ form.first_name }}
 												</div>
 												<div class="person-info__subitem lastname">
-													<input class="text-16 info" name="lastname" type="text" disabled value="Станиславчук">
+													{{ form.last_name }}
 												</div>
 												<div class="person-info__subitem mail">
-													<input class="text-16 info" name="mail" type="text" disabled value="{{ request.user.email }}">
+													{{ form.email }}
 												</div>
 												<div class="person-info__subitem phone">
-													<input class="text-16 info" name="phone" type="text" disabled value="+38(067)470 20 66">
+													{{ form.phone }}
 												</div>
 											</div>
 										</div>
@@ -24,10 +24,10 @@
 											<div class="person-info__title text-16">Адрес доставки:</div>
 											<div class="person-info__body">
 												<div class="person-info__subitem address">
-													<input class="text-16 info" name="address" type="text" disabled value="Черновцы">
+													{{ form.city }}
 												</div>
 												<div class="person-info__subitem home">
-													<input class="text-16 info" name="home" type="text" disabled value="№4">
+													{{ form.post_office }}
 												</div>
 											</div>
 										</div>

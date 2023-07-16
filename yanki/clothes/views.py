@@ -1,7 +1,12 @@
-from django.http import HttpResponseNotFound
+from django.http import HttpResponseNotFound, JsonResponse
+from django.shortcuts import render
 from django.views.generic import DetailView, ListView
+
+from users.models import User
 from yanki.settings import SITE_NAME
 from clothes.models import *
+from .forms import Change_person_data
+from .others import decode_json
 from .set_session_data.cart import get_list_cart, Cart
 from .set_session_data.currency import set_currency_for_page, get_all_sum_or_one
 from .set_session_data.like import get_list_favorite, set_like_cls_for_product
@@ -77,7 +82,22 @@ class ClothesInfo(GeneralMixin, ListView):
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
-        return {**context}
+        person = User.objects.get(id=self.request.user.id)
+        context["form"] = Change_person_data(instance=person)
+        return context
+
+    def post(self, request):
+        data = decode_json(request.body)
+        print(data, 22222222)
+        person = User.objects.get(id=self.request.user.id)
+        form = Change_person_data(data, instance=person)
+        response = "ok"
+        if form.is_valid():
+            form.save()
+        else:
+            response = "fail"
+            valid = form.errors.as_data()
+        return JsonResponse({"success": response})
 
 
 class ClothesCart(Cart, GeneralMixin, ListView):
@@ -113,7 +133,6 @@ class ClothesFavorite(GeneralMixin, ListView):
 class ClothesAbout(GeneralMixin, ListView):
     model = Product
     template_name = "clothes/o_nas.html"
-
 
 def pageNotFound(request, exception):
     return HttpResponseNotFound('dappes')
