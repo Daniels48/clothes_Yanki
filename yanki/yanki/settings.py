@@ -54,6 +54,7 @@ INSTALLED_APPS = [
 
     'debug_toolbar',
     'cities_light',
+    'django_cte',
 
     "widget_tweaks",
 

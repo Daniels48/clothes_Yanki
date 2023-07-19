@@ -8,13 +8,141 @@ window.onload = function () {
 	const global_like = "like";
 	const global_delay = 1200;
 
+	//-------------------------------------------keyupsearch-------------------------------------------------//
 	const head_search = document.querySelector(".search__input");
+	head_search.addEventListener("keyup", search_keyup);
 
+	async function search_keyup(e) {
+		const inp_value = head_search.value;
+		const cls_unview = "unview"
+		const cls = "searchsub__item";
+		const element_search = document.querySelector(`.${cls}s`);
+		const element_products = element_search.firstElementChild;
+		const element_category = element_search.lastElementChild;
+		const window_width = window.screen.width;
+
+
+		const key = e.key;
+		const list_key = ["ArrowDown", "ArrowUp"];
+		const list_tabs = document.querySelectorAll("[data-index]");
+
+		if (list_key.includes(key) && list_tabs.length) {
+			let element_enter = document.querySelector(`[data-isenter="True"]`)
+
+			if (!element_enter) {
+				element_enter = head_search;
+				element_enter.dataset.isenter = "True";
+			}
+
+
+			const index = element_enter.dataset.index;
+
+			if (list_key[0] == key) {
+				const next_index = Number(index) + 1;
+				let next_element = document.querySelector(`[data-index="${next_index}"]`)
+				if (!next_element) { next_element = head_search }
+				set_settings(next_element);
+
+			} else {
+				const prev_index = Number(index) - 1;
+				const max_index = head_search.dataset.max_index;
+				let prev_element = document.querySelector(`[data-index="${prev_index}"]`)
+				if (!prev_element) { prev_element = document.querySelector(`[data-index="${max_index}"]`) }
+				set_settings(prev_element);
+			}
+
+			function set_settings(element) {
+				const cls = "_keyup_enter";
+				const value_input = element.dataset.input;
+				head_search.value = value_input;
+
+				element_enter.dataset.isenter = "False";
+				element_enter.classList.remove(cls);
+
+				if (element != head_search) {
+					element.classList.add(cls);
+				}
+
+				element.dataset.isenter = "True";
+			}
+		} else {
+			if (inp_value) {
+				const url = get_global_url('search');
+				const request = {};
+				request["keyup_search"] = inp_value;
+				const response = send_data_on_server(request, url);
+				await get_data_in_promise(response, true_response, false_response)
+			} else {
+				clear__elements();
+				unview_elements("add");
+			}
+		}
+
+
+		function true_response(raw_data) {
+			clear__elements();
+			const products = raw_data.products;
+			const enter_value = raw_data.enter_value;
+			const max_index = raw_data.max_index;
+			head_search.dataset.index = 0;
+			head_search.dataset.input = enter_value;
+			head_search.dataset.max_index = max_index;
+
+			if (products.length) {
+				unview_elements("remove");
+				append_elements(products, element_products);
+				const category = raw_data.category;
+				append_elements(category, element_category);
+			} else { unview_elements("add") }
+		}
+
+		function false_response(e) {
+		}
+
+		function unview_elements(method) {
+			if (window_width > 767) { element_search.parentNode.parentNode.classList[method](cls_unview) }
+			else {
+				const antimethod = method == "add" ? "remove" : "add";
+				element_search.classList[method](cls_unview); document.querySelector(".burger__items").classList[antimethod](cls_unview);
+			}
+		}
+
+		function append_elements(list_objects, destination) {
+			list_objects.forEach(elem => { destination.insertAdjacentHTML("beforeEnd", get_html_elements(elem)) })
+		}
+
+		function get_html_elements(elem) {
+			if (elem.img) {
+				return `<a href="${elem.url}" data-category="${elem.id}" class="searchsub__category">
+										<div class="searchsub__textcategory">
+											<div class="searchsub__title text-20">${elem.title}</div>
+											<div class="searchsub__subtitle">Категория</div>
+										</div>
+										<div class="searchsub__img">
+											<img src="${elem.img}" alt="image">
+										</div>
+									</a>`;
+			} else {
+				return `<a href='${elem.url}' data-products='${elem.id}' class="${cls}" data-index="${elem.index}" data-isenter="False" data-input="${elem.input}">
+										<div class="searchsub__subitem">
+											<div class="searchsub__icon icon-search"></div>
+											<div class="searchsub__text">${elem.title}</div>
+										</div>
+								</a>`;
+			}
+		}
+
+		function clear__elements() {
+			element_products.innerText = "";
+			element_category.innerText = "";
+		}
+	}
+	//-------------------------------------------------------------------------------------------------------//
+
+	//-------------------------------------------keyupsearch_mouse--------------------------------------------//
 	const container_search_keyup = document.querySelector(".searchsub__products");
-
 	container_search_keyup.addEventListener("mouseover", set_settings_mouseover_for_search_keyup);
 	container_search_keyup.addEventListener("mouseout", clear_settings_mouseout_for_search_keyup);
-
 
 	function set_settings_mouseover_for_search_keyup(e) {
 		const obj = e.target
@@ -49,31 +177,16 @@ window.onload = function () {
 			head_search.dataset.isenter = "True";
 		}
 	}
+	//-------------------------------------------------------------------------------------------------------//
 
-
-	/* els.addEventListener("mouseout", (e) => {
-		const obj = e.target
-		console.log(obj, "out")
-	}); */
-
-
-
+	//-------------------------------------------document__exit----------------------------------------------//
 	document.addEventListener("unload", function () {
 		const url = window.location.href.split("?");
 		if (url[1]) { this.localStorage.removeItem("filters") }
 	});
+	//-------------------------------------------------------------------------------------------------------//
 
-	/* document.addEventListener("keyup", enter_keyup)
-
-	async function enter_keyup(e) {
-		const obj = e.target;
-		if (obj.classList.contains("search__input")) { search_keyup(e) }
-
-	} */
-
-	head_search.addEventListener("keyup", search_keyup);
-
-
+	//-------------------------------------------document__click----------------------------------------------//
 	document.addEventListener('click', (e) => {
 		const cls_active_element = "_active";
 		const obj = e.target;
@@ -707,132 +820,7 @@ window.onload = function () {
 
 		}
 	});
-
-	async function search_keyup(e) {
-		const inp_value = head_search.value;
-		const cls_unview = "unview"
-		const cls = "searchsub__item";
-		const element_search = document.querySelector(`.${cls}s`);
-		const element_products = element_search.firstElementChild;
-		const element_category = element_search.lastElementChild;
-		const window_width = window.screen.width;
-
-
-		const key = e.key;
-		const list_key = ["ArrowDown", "ArrowUp"];
-		const list_tabs = document.querySelectorAll("[data-index]");
-
-		if (list_key.includes(key) && list_tabs.length) {
-			let element_enter = document.querySelector(`[data-isenter="True"]`)
-
-			if (!element_enter) {
-				element_enter = head_search;
-				element_enter.dataset.isenter = "True";
-			}
-
-
-			const index = element_enter.dataset.index;
-
-			if (list_key[0] == key) {
-				const next_index = Number(index) + 1;
-				let next_element = document.querySelector(`[data-index="${next_index}"]`)
-				if (!next_element) { next_element = head_search }
-				set_settings(next_element);
-
-			} else {
-				const prev_index = Number(index) - 1;
-				const max_index = head_search.dataset.max_index;
-				let prev_element = document.querySelector(`[data-index="${prev_index}"]`)
-				if (!prev_element) { prev_element = document.querySelector(`[data-index="${max_index}"]`) }
-				set_settings(prev_element);
-			}
-
-			function set_settings(element) {
-				const cls = "_keyup_enter";
-				const value_input = element.dataset.input;
-				head_search.value = value_input;
-
-				element_enter.dataset.isenter = "False";
-				element_enter.classList.remove(cls);
-
-				if (element != head_search) {
-					element.classList.add(cls);
-				}
-
-				element.dataset.isenter = "True";
-			}
-		} else {
-			if (inp_value) {
-				const url = get_global_url('search');
-				const request = {};
-				request["keyup_search"] = inp_value;
-				const response = send_data_on_server(request, url);
-				await get_data_in_promise(response, true_response, false_response)
-			} else {
-				clear__elements();
-				unview_elements("add");
-			}
-		}
-
-
-		function true_response(raw_data) {
-			clear__elements();
-			const products = raw_data.products;
-			const enter_value = raw_data.enter_value;
-			const max_index = raw_data.max_index;
-			head_search.dataset.index = 0;
-			head_search.dataset.input = enter_value;
-			head_search.dataset.max_index = max_index;
-
-			if (products.length) {
-				unview_elements("remove");
-				append_elements(products, element_products);
-				const category = raw_data.category;
-				append_elements(category, element_category);
-			} else { unview_elements("add") }
-		}
-
-		function false_response(e) {
-		}
-
-		function unview_elements(method) {
-			if (window_width > 767) { element_search.parentNode.parentNode.classList[method](cls_unview) }
-			else {
-				const antimethod = method == "add" ? "remove" : "add";
-				element_search.classList[method](cls_unview); document.querySelector(".burger__items").classList[antimethod](cls_unview);
-			}
-		}
-
-		function append_elements(list_objects, destination) {
-			list_objects.forEach(elem => { destination.insertAdjacentHTML("beforeEnd", get_html_elements(elem)) })
-		}
-
-		function get_html_elements(elem) {
-			if (elem.img) {
-				return `<a href="${elem.url}" data-category="${elem.id}" class="searchsub__category">
-										<div class="searchsub__textcategory">
-											<div class="searchsub__title text-20">${elem.title}</div>
-											<div class="searchsub__subtitle">Категория</div>
-										</div>
-										<div class="searchsub__img">
-											<img src="${elem.img}" alt="image">
-										</div>
-									</a>`;
-			} else {
-				return `<a href='${elem.url}' data-products='${elem.id}' class="${cls}" data-index="${elem.index}" data-isenter="False" data-input="${elem.input}">
-										<div class="searchsub__subitem">
-											<div class="searchsub__icon icon-search"></div>
-											<div class="searchsub__text">${elem.title}</div>
-										</div>
-								</a>`;
-			}
-		}
-
-		function clear__elements() {
-			element_products.innerText = "";
-			element_category.innerText = "";
-		}
-	}
+	//-------------------------------------------------------------------------------------------------------//
 
 	//-------------------------------------------authenticate-------------------------------------------------//
 	async function aunthetification(type, button_next = false) {

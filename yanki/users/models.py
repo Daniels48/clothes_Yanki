@@ -19,8 +19,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     is_verified = models.BooleanField(verbose_name="verified", default=False)
-    like_list = models.ManyToManyField(BaseProduct, related_name="Like_list")
-    cart_list = models.ManyToManyField("CartProduct", related_name="Cart_list")
+    # like_list = models.ManyToManyField(BaseProduct, related_name="Like_list")
+    # cart_list = models.ManyToManyField("CartProduct", related_name="Cart_list")
 
     objects = UserManager()
 
@@ -33,43 +33,43 @@ class User(AbstractBaseUser, PermissionsMixin):
         unique_together = ("username", "email", "phone")
 
 
-class Orders(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, default=None, db_index=True)
-    email = models.EmailField(verbose_name="email address", blank=True, db_index=True)
-    first_name = models.CharField(max_length=255, db_index=True)
-    last_name = models.CharField(max_length=255, db_index=True)
-    delivery_method = models.ForeignKey("Delivery_methods", related_name="deliverys_method", on_delete=models.CASCADE)
-    phone = models.CharField(max_length=255)
-    pay_method = models.ForeignKey("Pay_methods", related_name="pays_method", on_delete=models.CASCADE)
-    status = models.ForeignKey("Pay_methods", on_delete=models.CASCADE, default=1)
-    sum_order = models.DecimalField(max_digits=10, decimal_places=2)
-    date_order = models.DateTimeField(verbose_name="data joined", auto_now=True)
-    clothes = models.ManyToManyField(Product, through="OrderProduct")
-
-
-class Delivery_methods(models.Model):
-    name = models.CharField(max_length=255, db_index=True)
-
-
-class Pay_methods(models.Model):
-    name = models.CharField(max_length=255, db_index=True)
-
-
-class List_status(models.Model):
-    name = models.CharField(max_length=255, db_index=True)
-
-
-class OrderProduct(models.Model):
-    product = models.ForeignKey(Product, related_name="Products", on_delete=models.CASCADE)
-    order = models.ForeignKey(Orders, related_name="orders", on_delete=models.CASCADE)
-    count = models.PositiveIntegerField()
-
-
-class CartProduct(models.Model):
-    product = models.ForeignKey(Product, related_name="CartProducts", on_delete=models.CASCADE)
-    user = models.ForeignKey(User, related_name="Cartorders", on_delete=models.CASCADE)
-    count = models.PositiveIntegerField()
-
-
-class Mailing_news(models.Model):
-    email = models.EmailField(verbose_name="email address", blank=True, db_index=True)
+# class Orders(models.Model):
+#     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, default=None, db_index=True)
+#     email = models.EmailField(verbose_name="email address", blank=True, db_index=True)
+#     first_name = models.CharField(max_length=255, db_index=True)
+#     last_name = models.CharField(max_length=255, db_index=True)
+#     delivery_method = models.ForeignKey("Delivery_methods", related_name="deliverys_method", on_delete=models.CASCADE)
+#     phone = models.CharField(max_length=255)
+#     pay_method = models.ForeignKey("Pay_methods", related_name="pays_method", on_delete=models.CASCADE)
+#     status = models.ForeignKey("Pay_methods", on_delete=models.CASCADE, default=1)
+#     sum_order = models.DecimalField(max_digits=10, decimal_places=2)
+#     date_order = models.DateTimeField(verbose_name="data joined", auto_now=True)
+#     clothes = models.ManyToManyField(Product, through="OrderProduct")
+#
+#
+# class Delivery_methods(models.Model):
+#     name = models.CharField(max_length=255, db_index=True)
+#
+#
+# class Pay_methods(models.Model):
+#     name = models.CharField(max_length=255, db_index=True)
+#
+#
+# class List_status(models.Model):
+#     name = models.CharField(max_length=255, db_index=True)
+#
+#
+# class OrderProduct(models.Model):
+#     product = models.ForeignKey(Product, related_name="Products", on_delete=models.CASCADE)
+#     order = models.ForeignKey(Orders, related_name="orders", on_delete=models.CASCADE)
+#     count = models.PositiveIntegerField()
+#
+#
+# class CartProduct(models.Model):
+#     product = models.ForeignKey(Product, related_name="CartProducts", on_delete=models.CASCADE)
+#     user = models.ForeignKey(User, related_name="Cartorders", on_delete=models.CASCADE)
+#     count = models.PositiveIntegerField()
+#
+#
+# class Mailing_news(models.Model):
+#     email = models.EmailField(verbose_name="email address", blank=True, db_index=True)
