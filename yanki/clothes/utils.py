@@ -5,8 +5,25 @@ from clothes.models import *
 from clothes.others import sum_products
 from clothes.set_session_data.currency import get_currency_for_page, get_list_currency, get_sign, get_valute
 # from clothes.utilits.Products import calc_color, get_finished_products
+from users.models import CartProduct
 from yanki.settings import CURRENCY_SESSION_ID, CART_SESSION_ID, LIKE_SESSION_ID
 
+
+def get_cart_in_bd(request):
+    if request.user.is_authenticated:
+        price = "product__parent__price"
+        query_cart = CartProduct.objects.filter(user=request.user). \
+            select_related("product__parent").values("product", "count", price)
+
+        is_valid = query_cart.exists()
+        cart = {item.get("product"): {"count": item.get("count"), "price": float(item.get(price))}
+                for item in query_cart}
+        if not is_valid:
+            return {}
+        request.session[CART_SESSION_ID] = cart
+        return cart
+    else:
+        return {}
 
 class GeneralDataMixin:
     def get_context_data(self, *, object_list=None, **kwargs):
@@ -15,7 +32,8 @@ class GeneralDataMixin:
         context[CURRENCY_SESSION_ID] = currency
         context["sign"] = get_sign(currency)
         context["currency_other"] = get_list_currency(currency)
-        context["cart_count"] = sum_products(self.request.session.get(CART_SESSION_ID, {}))
+        count = self.request.session.get(CART_SESSION_ID, get_cart_in_bd(self.request))
+        context["cart_count"] = sum_products(count)
         return context
 
 
@@ -62,8 +80,7 @@ def get_catalog_products(category, filters, request):
             list_filters[pk] = Product.objects. \
                 select_related("parent", "size", "color").\
                 annotate(newprice=ExpressionWrapper(F("parent__price") * value_sign,
-                                                    output_field=models.DecimalField()),
-                         ).\
+                                                    output_field=models.DecimalField())).\
                 filter(*cats, **elements).values("parent_id")
 
         return list_filters

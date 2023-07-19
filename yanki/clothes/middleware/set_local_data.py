@@ -14,13 +14,10 @@ def set_items(data, request):
 
 def set_local_data(get_response):
     def middleware(request):
-
         if request.method == "POST" and request.META.get("PATH_INFO").count("admin") != 1:
             data = decode_json(request.body)
-
             if data.get(local_name):
                 request = set_items(data, request)
-
         response = get_response(request)
         return response
 

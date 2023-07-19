@@ -19,8 +19,9 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     is_verified = models.BooleanField(verbose_name="verified", default=False)
-    # like_list = models.ManyToManyField(BaseProduct, related_name="Like_list")
-    # cart_list = models.ManyToManyField("CartProduct", related_name="Cart_list")
+    like_list = models.ManyToManyField(BaseProduct, related_name="Like_list")
+    cart_list = models.ManyToManyField(Product, related_name="Cart_list", through="CartProduct")
+    currency = models.CharField(max_length=15, default="UAH", verbose_name="Currency")
 
     objects = UserManager()
 
@@ -43,7 +44,8 @@ class User(AbstractBaseUser, PermissionsMixin):
 #     pay_method = models.ForeignKey("Pay_methods", related_name="pays_method", on_delete=models.CASCADE)
 #     status = models.ForeignKey("Pay_methods", on_delete=models.CASCADE, default=1)
 #     sum_order = models.DecimalField(max_digits=10, decimal_places=2)
-#     date_order = models.DateTimeField(verbose_name="data joined", auto_now=True)
+#     currency = models.CharField(max_length=15)
+#     date_order = models.DateTimeField(verbose_name="data order", auto_now=True)
 #     clothes = models.ManyToManyField(Product, through="OrderProduct")
 #
 #
@@ -65,10 +67,10 @@ class User(AbstractBaseUser, PermissionsMixin):
 #     count = models.PositiveIntegerField()
 #
 #
-# class CartProduct(models.Model):
-#     product = models.ForeignKey(Product, related_name="CartProducts", on_delete=models.CASCADE)
-#     user = models.ForeignKey(User, related_name="Cartorders", on_delete=models.CASCADE)
-#     count = models.PositiveIntegerField()
+class CartProduct(models.Model):
+    product = models.ForeignKey(Product, related_name="CartProducts", on_delete=models.CASCADE)
+    user = models.ForeignKey(User, related_name="Cartuser", on_delete=models.CASCADE)
+    count = models.PositiveIntegerField()
 #
 #
 # class Mailing_news(models.Model):

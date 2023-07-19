@@ -3,8 +3,10 @@ from re import findall
 from clothes.models import Product
 from clothes.others import decode_json, get_int_count, sum_products
 from clothes.set_session_data.currency import get_local_data_for_cart, get_all_sum_or_one
+from clothes.utilits.authenticate.authenticate import set_data_request
 from clothes.utils import get_selected_products
-from yanki.settings import CART_SESSION_ID, CURRENCY_SESSION_ID
+from users.models import CartProduct
+from yanki.settings import CART_SESSION_ID, CURRENCY_SESSION_ID, LIKE_SESSION_ID
 
 name_id = "id"
 name_sign = "sign"
@@ -17,7 +19,6 @@ set_cart = "new_cart"
 command = "command"
 global_count = "count"
 
-
 non_cart = "<div class='cart__null null'> <div class='null__img'> <div class='null__icon icon-cart'></div>" \
            "</div><div class='null__data'><div class='null__text text-20'>В корзине нет товаров</div>" \
            "<div class='null__subinfo'><div class='null__subtext text-14'>Перейдите в каталог, " \
@@ -26,13 +27,14 @@ non_cart = "<div class='cart__null null'> <div class='null__img'> <div class='nu
 
 
 def get_list_cart(request):
-    raw_cart = request.session.get(CART_SESSION_ID, [])
+    raw_cart = request.session.get(CART_SESSION_ID, get_cart_in_bd(request))
     cart = get_cart_for_local(raw_cart)
     filters = {"id__in": [*cart]}
     products = get_selected_products(filters, CART_SESSION_ID)
 
     for item in products:
         count = findall(r"\d+", str(cart.get(str(item.id))))[0]
+
         if type(cart.get(str(item.id))) != int:
             item.max = True
         item.cart = count
@@ -42,7 +44,7 @@ def get_list_cart(request):
 
 
 def get_products_from_bd(id_products):
-    get_from_bd = lambda id_products: Product.objects.filter(id__in=id_products).\
+    get_from_bd = lambda id_products: Product.objects.filter(id__in=id_products). \
         select_related("parent").only("id", global_count, "parent__price")
     if type(id_products) != list:
         id_products = [id_products]
@@ -63,6 +65,7 @@ def set_cart(data, request):
             product_id = str(product.id)
             old_count = cart[product_id]
             cart[product_id] = check_availability_product(product, old_count, False)
+
         request.session[CART_SESSION_ID] = cart
 
     return request
@@ -72,6 +75,7 @@ def check_availability_product(product, old_count, sign):
     def check_product(count_in_bd, count_old):
         def set_max_count(count):
             return str(count) + "M"
+
         new_count = count_old
 
         if new_count > count_in_bd:
@@ -84,6 +88,7 @@ def check_availability_product(product, old_count, sign):
             new_count = 0
 
         return new_count
+
     old_count = get_int_count(old_count)
     value = 1 if sign == add_product else -1
     product_count_in_bd = product.count
@@ -103,21 +108,57 @@ def set_local_cart(raw_cart):
     return cart
 
 
+def get_cart_in_bd(request):
+    if request.user.is_authenticated:
+        price = "product__parent__price"
+        query_cart = CartProduct.objects.filter(user=request.user). \
+            select_related("product__parent").values("product", "count", price)
+
+        is_valid = query_cart.exists()
+        cart = {str(item.get("product")): {"count": item.get("count"), "price": float(item.get(price))}
+                for item in query_cart}
+        if not is_valid:
+            return {}
+        request.session[CART_SESSION_ID] = cart
+        return cart
+    else:
+        return {}
+
+
 def change_product(data, request):
     finally_data = {}
     cart = request.session.get(CART_SESSION_ID, {})
+    authenticated = request.user.is_authenticated
+
+    if not cart:
+        if authenticated:
+            cart = get_cart_in_bd(request)
+
     product_id, sign = data.get(name_id), data.get(name_sign)
+
     if sign != del_product:
         product = get_products_from_bd(product_id)
         old_count = cart.get(product_id, 0)
+
         if old_count != 0:
             old_count = old_count.get(global_count)
+
         cmd = check_availability_product(product, old_count, sign)
+
         cart[product_id] = cmd
         request.session[CART_SESSION_ID] = cart
         cmd = cmd.get(global_count)
+        if authenticated:
+            obj = CartProduct.objects.get(user=request.user, product=product_id)
+            if obj:
+                obj.count = get_int_count(cmd)
+                obj.save()
+            else:
+                obj = CartProduct.objects.create(user=request.user, product=product_id, count=get_int_count(cmd))
+                obj.save()
     else:
         del cart[product_id]
+        CartProduct.objects.get(user=request.user, product=product_id).delete()
         cmd = "delete"
         if len(cart) == 0:
             del request.session[CART_SESSION_ID]
@@ -140,5 +181,3 @@ class Cart:
         if data.get(name_id):
             cart = change_product(data, request)
         return json_response(cart)
-
-

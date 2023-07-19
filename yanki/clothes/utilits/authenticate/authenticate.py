@@ -2,10 +2,13 @@ from django.contrib.auth import login
 from django.db.models import Q
 from django.http import JsonResponse
 from django.views import View
+
+from clothes.models import Product
 from clothes.utilits.authenticate.send_data import data
 from clothes.others import decode_json
 from clothes.services.email import send_activate_email_message
-from users.models import User
+from users.models import User, CartProduct
+from yanki.settings import CART_SESSION_ID
 
 
 def get_user(username):
@@ -23,6 +26,7 @@ class AuthenticateMixin(View):
             try:
                 user = get_user(username)
                 if user.check_password(password):
+                    set_data_request(request, user)
                     login(request, user)
                     return JsonResponse({"success": 'yes'})
                 else:
@@ -69,4 +73,17 @@ class AuthenticateMixin(View):
                 login(request, user)
 
         return JsonResponse({"data": data[types]})
+
+
+def set_data_request(request, user):
+    cart = request.session.get(CART_SESSION_ID)
+    if cart:
+        CartProduct.objects.filter(user=user).delete()
+        for key in cart:
+            count = cart[key].get("count")
+            product = Product.objects.get(pk=int(key))
+            cart_product = CartProduct.objects.create(product=product, user=user, count=count)
+            cart_product.save()
+
+
 

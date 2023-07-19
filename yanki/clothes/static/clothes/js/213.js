@@ -869,6 +869,7 @@ window.onload = function () {
 			}
 
 			const response = send_data_on_server(request, url);
+			console.log(request, 777777777)
 			get_data_in_promise(response, receive_data, error_receive);
 
 			function receive_data(response) {
