@@ -11,7 +11,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     username = models.CharField(verbose_name="username", max_length=255, unique=True)
     email = models.EmailField(verbose_name="email address", blank=True, unique=True)
     phone = models.CharField(verbose_name="phone number", max_length=30, blank=True, unique=True)
-    date_join = models.DateTimeField(verbose_name="data joined", auto_now=True)
+    date_join = models.DateTimeField(verbose_name="data joined", auto_now_add=True)
     first_name = models.CharField(verbose_name='Имя', max_length=255, blank=True, null=True)
     last_name = models.CharField(verbose_name='Фамилия', max_length=255, blank=True, null=True)
     city = models.CharField(verbose_name="Город", max_length=255, blank=True, null=True)

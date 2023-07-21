@@ -4,26 +4,26 @@ from django.db.models import Q, F, ExpressionWrapper, Max
 from clothes.models import *
 from clothes.others import sum_products
 from clothes.set_session_data.currency import get_currency_for_page, get_list_currency, get_sign, get_valute
-# from clothes.utilits.Products import calc_color, get_finished_products
 from users.models import CartProduct
 from yanki.settings import CURRENCY_SESSION_ID, CART_SESSION_ID, LIKE_SESSION_ID
 
 
 def get_cart_in_bd(request):
-    if request.user.is_authenticated:
-        price = "product__parent__price"
-        query_cart = CartProduct.objects.filter(user=request.user). \
-            select_related("product__parent").values("product", "count", price)
+    if not request.session.get(CART_SESSION_ID):
+        if request.user.is_authenticated:
+            price = "product__parent__price"
+            query_cart = CartProduct.objects.filter(user=request.user). \
+                select_related("product__parent").values("product", "count", price)
 
-        is_valid = query_cart.exists()
-        cart = {item.get("product"): {"count": item.get("count"), "price": float(item.get(price))}
-                for item in query_cart}
-        if not is_valid:
-            return {}
-        request.session[CART_SESSION_ID] = cart
-        return cart
+            cart = {str(item.get("product")): {"count": item.get("count"), "price": float(item.get(price))}
+                    for item in query_cart}
+            request.session[CART_SESSION_ID] = cart
+            return cart
+        else:
+            return []
     else:
-        return {}
+        return request.session.get(CART_SESSION_ID, [])
+
 
 class GeneralDataMixin:
     def get_context_data(self, *, object_list=None, **kwargs):
@@ -32,7 +32,7 @@ class GeneralDataMixin:
         context[CURRENCY_SESSION_ID] = currency
         context["sign"] = get_sign(currency)
         context["currency_other"] = get_list_currency(currency)
-        count = self.request.session.get(CART_SESSION_ID, get_cart_in_bd(self.request))
+        count = get_cart_in_bd(self.request)
         context["cart_count"] = sum_products(count)
         return context
 
@@ -45,7 +45,7 @@ def get_raw_union_products():
     return Product.objects.select_related("parent", "parent__type", "size", "color")
 
 
-def get_selected_products(filters=False, types=False, request=False):
+def get_selected_products(filters=False, types=False):
     general_fields = ["parent__title", "parent__price", "parent__slug",
                       "id", "parent__type__slug", "size__title", "color__hex"]
     list_fields = {"cart": ["image_1", "count"], "catalog": ["image", "parent__tags__title"]}
@@ -86,8 +86,8 @@ def get_catalog_products(category, filters, request):
         return list_filters
 
     list_filters = get_filters(filters, category)
-    raw_list = get_selected_products(list_filters, "catalog", request)
-    return get_finished_products(raw_list)
+    list_query = get_selected_products(list_filters, "catalog")
+    return Set_data_products(list_query, request).products
 
 
 def get_list_category():
@@ -95,43 +95,13 @@ def get_list_category():
 
 
 def get_product(name, request):
-    def re_context(key, obj):
-        data = {"care": {"pattern": r"-[\s\w]+", "string": obj.parent.care},
-                "composition": {"pattern": r"\w+:(?:\s\d+%\s\w+,?)+", "string": obj.parent.composition}}
-        pattern = data[key]["pattern"]
-        string = data[key]["string"]
-        return "<br>".join(findall(pattern, string))
-
-    def get_sizes_product(lst_objs):
-        list_objects = {}
-        for obj in lst_objs:
-            clr = obj.color.hex
-            if clr not in list_objects:
-                list_objects[clr] = [obj]
-            else:
-                list_objects[clr].append(obj)
-
-        for key, value in list_objects.items():
-            list_objects[key] = sorted(value, key=lambda item: item.size.id, reverse=True)
-
-        return list_objects
-
-    def get_colors_product(lst_objs):
-        lst_raw, lst = [], []
-        [(lst.append(obj), lst_raw.append(obj.color.id)) for obj in lst_objs if obj.color.id not in lst_raw]
-        return sorted(lst, key=lambda obj: calc_color(obj.color.hex), reverse=True)
-
     list_products = get_raw_union_products().filter(parent__slug=name)
-    list_products[0].colors = get_colors_product(list_products)
-    list_products[0].sizes = get_sizes_product(list_products)
-    list_products[0].care = re_context("care", list_products[0])
-    list_products[0].composition = re_context("composition", list_products[0])
-    return list_products[0]
+    return Set_data_products(list_products, request, False, True).product
 
 
-def get_list_for_product():
-    raw_list = get_selected_products(types="catalog")
-    return get_finished_products(raw_list)
+def get_list_for_product(request):
+    list_query = get_selected_products(types="catalog")
+    return Set_data_products(list_query, request).products
 
 
 def get_max_price(request):
@@ -157,54 +127,153 @@ def sort_color(lst):
     return sorted(lst, key=lambda elem: calc_color(elem), reverse=True)
 
 
-def get_finished_products(raw_list):
-    lst_sort = sorted(raw_list, key=lambda elem: elem.id)
-    lst_id = []
-    list_product = []
+def decorator(func):
+    from datetime import datetime
 
-    for item in lst_sort:
-        if item.parent_id not in lst_id:
+    def wrapper(*args, **kwargs):
+        time_init = datetime.now()
+        result = func(*args, **kwargs)
+        time_finish = datetime.now()
+        print(f'Время работы функции: = {time_finish-time_init}')
+        return result
+    return wrapper
+
+
+class Set_data_products:
+    def __init__(self, list_products, request, search=False, one=False):
+        self.one = one
+        self.list_products = list_products
+        self.request = request
+        self.search = search
+        self.list_like = None
+        self.sign = None
+        self.old_value = None
+        self.new_value = None
+        self.list_cateogry_obj = {}
+
+        if self.one:
+            self.product = None
+            self.list_size = {}
+            self.list_color = []
+            self.id_color = []
+            self.product = self.get_full_products()
+        else:
+            self.products = self.get_full_products()
+
+    def set_currency(self, element):
+        if self.sign is None or self.old_value is None or self.new_value is None:
+            currency = get_currency_for_page(self.request)
+            self.sign = get_sign(currency)
+            self.old_value, self.new_value = get_valute(currency)
+
+        id_element = element.parent_id
+        if id_element not in self.list_cateogry_obj and not self.one:
+            self.set_f_price(element)
+
+        if self.one:
+            self.set_f_price(element)
+
+    def set_f_price(self, element):
+        price = element.parent.price
+        if self.sign != "грн":
+            element.f_price = f"{round(float(price) * self.old_value / float(self.new_value), 2)} {self.sign}"
+        else:
+            element.f_price = f"{int(price)} {self.sign}"
+
+    def set_like(self, element):
+        if self.list_like is None:
+            self.list_like = self.request.session.get(LIKE_SESSION_ID, [])
+
+        id_element = element.parent_id
+        if id_element not in self.list_cateogry_obj and not self.one:
+            value_like = str(id_element) in self.list_like or id_element in self.list_like
+            element.like = value_like
+
+        if self.one:
+            value_like = str(id_element) in self.list_like or id_element in self.list_like
+            element.like = value_like
+
+    def sort_size_and_color(self, element):
+        if self.search:
+            element.size = sort_size(element.size)
+            element.color = sort_color(element.color)
+        else:
+            element.size.title = sort_size(element.size.title)
+            element.color.hex = sort_color(element.color.hex)
+
+    def sort_size_one_product(self):
+        for key, value in self.list_size.items():
+            self.list_size[key] = sorted(value, key=lambda item: item.size.id, reverse=True)
+        return self.list_size
+
+    def sort_color_one_product(self):
+        return sorted(self.list_color, key=lambda obj: calc_color(obj.color.hex), reverse=True)
+
+    def set_size_product(self, element):
+        clr = element.color.hex
+
+        if not self.product:
+            self.product = element
+
+        if clr not in self.list_size:
+            self.list_size[clr] = [element]
+        else:
+            self.list_size[clr].append(element)
+
+    def set_color_product(self, element):
+        id_color = element.color.id
+
+        if not self.product:
+            self.product = element
+
+        if id_color not in self.id_color:
+            self.id_color.append(id_color)
+            self.list_color.append(element)
+
+    def set_re_context_one_product(self, key):
+        data = {"care": {"pattern": r"-[\s\w]+", "string": self.product.parent.care},
+                "composition": {"pattern": r"\w+:(?:\s\d+%\s\w+,?)+", "string": self.product.parent.composition}}
+        pattern = data[key]["pattern"]
+        string = data[key]["string"]
+        return "<br>".join(findall(pattern, string))
+
+    def set_full_data(self, element):
+        if self.one:
+            self.set_color_product(element)
+            self.set_size_product(element)
+        else:
+            self.set_like(element)
+            self.set_currency(element)
+            new_element = self.set_category(element)
+            self.sort_size_and_color(new_element)
+
+    def set_category(self, item):
+
+        if item.parent_id not in self.list_cateogry_obj:
             item.color.hex = [item.color.hex, ]
             item.size.title = [item.size.title, ]
-            lst_id.append(item.parent_id)
-            for x in raw_list:
-                if x.id != item.id and x.parent_id == item.parent_id:
-                    if x.color.hex not in item.color.hex:
-                        item.color.hex.append(x.color.hex)
-                    if x.size.title not in item.size.title:
-                        item.size.title.append(x.size.title)
+            self.list_cateogry_obj[item.parent_id] = item
+            return item
 
-            list_product.append(item)
+        else:
+            old_item = self.list_cateogry_obj[item.parent_id]
+            old_item.color.hex = {*old_item.color.hex, item.color.hex}
+            old_item.size.title = {*old_item.size.title, item.size.title}
+            self.list_cateogry_obj[item.parent_id] = old_item
+            return old_item
 
-    return list_product
+    def get_full_products(self):
+        [self.set_full_data(item) for item in self.list_products]
+
+        if self.one:
+            self.product.care = self.set_re_context_one_product("care")
+            self.product.composition = self.set_re_context_one_product("composition")
+            self.product.sizes = self.sort_size_one_product()
+            self.product.colors = self.sort_color_one_product()
+            self.set_like(self.product)
+            self.set_currency(self.product)
+            return self.product
+
+        return list(self.list_cateogry_obj.values())
 
 
-def set_currency_and_like(list_products, request, search=False):
-    list_like = request.session.get(LIKE_SESSION_ID, [])
-    set_like = lambda x: str(x.parent.id) in list_like
-    currency = get_currency_for_page(request)
-    sign = get_sign(currency)
-    old_vals, new_vals = get_valute(currency)
-
-    def set_data(products_list):
-        for item in products_list:
-            if search:
-                item.size = sort_size(item.size)
-                item.color = sort_color(item.color)
-            else:
-                item.size.title = sort_size(item.size.title)
-                item.color.hex = sort_color(item.color.hex)
-            item.like = set_like(item)
-            if sign != "грн":
-                item.f_price = f"{round(float(item.parent.price) * old_vals / float(new_vals), 2)} {sign}"
-            else:
-                item.f_price = f"{int(item.parent.price)} {sign}"
-        return products_list
-
-    if type(list_products) != list:
-        products = set_data([list_products])
-        return products[0]
-
-    products = set_data(list_products)
-
-    return products

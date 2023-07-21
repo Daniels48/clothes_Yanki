@@ -1,6 +1,5 @@
 from django.http import HttpResponseNotFound, JsonResponse
 from django.views.generic import DetailView, ListView
-from users.models import User
 from yanki.settings import SITE_NAME, CART_SESSION_ID, LIKE_SESSION_ID, CURRENCY_SESSION_ID
 from clothes.models import *
 from .forms import Change_person_data
@@ -9,7 +8,7 @@ from .set_session_data.cart import get_list_cart, Cart
 from .set_session_data.currency import set_currency_for_page, get_all_sum_or_one
 from .set_session_data.like import get_list_favorite, set_like_cls_for_product
 from .utils import GeneralMixin, get_catalog_products, get_list_category, get_product, get_list_for_product, \
-    get_max_price, set_currency_and_like
+    get_max_price, Set_data_products
 
 
 class ClothesHome(GeneralMixin, ListView):
@@ -29,9 +28,7 @@ class ClothesCatalog(GeneralMixin, ListView):
 
     def get_queryset(self):
         category, filters = [self.kwargs.get("category"), self.request.GET]
-        products = get_catalog_products(category, filters, self.request)
-        query = set_currency_and_like(products, self.request)
-        return query
+        return get_catalog_products(category, filters, self.request)
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -55,16 +52,12 @@ class ClothesProduct(GeneralMixin, DetailView):
 
     def get_object(self, queryset=None):
         name = self.kwargs.get("name")
-        raw_product = get_product(name, self.request)
-        products_currency = set_currency_for_page(raw_product, self.request)
-        # query = set_currency_and_like(raw_product, self.request)
-        # # return query
-        return set_like_cls_for_product(products_currency, self.request)
+        return get_product(name, self.request)
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
         context["title"] = self.object.parent.title
-        context["list"] = set_currency_for_page(get_list_for_product(), self.request)
+        context["list"] = get_list_for_product(self.request)
         return context
 
 
@@ -80,18 +73,13 @@ class ClothesInfo(GeneralMixin, ListView):
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
-        person = User.objects.get(id=self.request.user.id)
+        person = self.request.user
         context["form"] = Change_person_data(instance=person)
-        # car = self.request.session[CART_SESSION_ID]
-        # l = self.request.session[LIKE_SESSION_ID]
-        # usd = self.request.session[CURRENCY_SESSION_ID]
-        # print(car, l, usd, 222222222222222222)
-
         return context
 
     def post(self, request):
         data = decode_json(request.body)
-        person = User.objects.get(id=self.request.user.id)
+        person = self.request.user
         form = Change_person_data(data, instance=person)
         response = "ok"
         if form.is_valid():
@@ -120,10 +108,7 @@ class ClothesFavorite(GeneralMixin, ListView):
     template_name = "clothes/favorite.html"
 
     def get_queryset(self):
-        raw_query = get_list_favorite(self.request)
-        query = set_currency_and_like(raw_query, self.request)
-        # query = set_like_cls_for_product(raw_query, self.request)
-        return query
+        return get_list_favorite(self.request)
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)

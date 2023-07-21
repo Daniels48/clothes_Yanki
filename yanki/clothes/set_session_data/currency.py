@@ -5,6 +5,7 @@ from django.db.models import Max
 from django.views import View
 from clothes.models import BaseProduct
 from clothes.others import json_response, decode_json
+from users.models import User
 from yanki.settings import CURRENCY_SESSION_ID, CART_SESSION_ID
 
 cache = {}
@@ -19,8 +20,15 @@ def get_list_currency(value):
     return [x for x in currency_list if x != value]
 
 
-def get_currency_for_page(data):
-    currency = data.session.get(CURRENCY_SESSION_ID, base_nominal)
+def get_currency_for_page(request):
+
+    currency = request.session.get(CURRENCY_SESSION_ID, base_nominal)
+    if currency == base_nominal:
+        if request.user.is_authenticated:
+            currency = request.user.currency
+            if not currency:
+                currency = base_nominal
+            request.session[CURRENCY_SESSION_ID] = currency
     return currency
 
 
@@ -72,6 +80,9 @@ if not len(cache):
 def set_currency(data, request):
     currency = data.get(CURRENCY_SESSION_ID)
     if currency:
+        if request.user.is_authenticated:
+            request.user.currency = currency
+            request.user.save()
         request.session[CURRENCY_SESSION_ID] = currency
     return request
 

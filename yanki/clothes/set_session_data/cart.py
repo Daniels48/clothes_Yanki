@@ -3,7 +3,6 @@ from re import findall
 from clothes.models import Product
 from clothes.others import decode_json, get_int_count, sum_products
 from clothes.set_session_data.currency import get_local_data_for_cart, get_all_sum_or_one
-from clothes.utilits.authenticate.authenticate import set_data_request
 from clothes.utils import get_selected_products
 from users.models import CartProduct
 from yanki.settings import CART_SESSION_ID, CURRENCY_SESSION_ID, LIKE_SESSION_ID
@@ -27,7 +26,7 @@ non_cart = "<div class='cart__null null'> <div class='null__img'> <div class='nu
 
 
 def get_list_cart(request):
-    raw_cart = request.session.get(CART_SESSION_ID, get_cart_in_bd(request))
+    raw_cart = get_cart_in_bd(request)
     cart = get_cart_for_local(raw_cart)
     filters = {"id__in": [*cart]}
     products = get_selected_products(filters, CART_SESSION_ID)
@@ -109,20 +108,20 @@ def set_local_cart(raw_cart):
 
 
 def get_cart_in_bd(request):
-    if request.user.is_authenticated:
-        price = "product__parent__price"
-        query_cart = CartProduct.objects.filter(user=request.user). \
-            select_related("product__parent").values("product", "count", price)
+    if not request.session.get(CART_SESSION_ID):
+        if request.user.is_authenticated:
+            price = "product__parent__price"
+            query_cart = CartProduct.objects.filter(user=request.user). \
+                select_related("product__parent").values("product", "count", price)
 
-        is_valid = query_cart.exists()
-        cart = {str(item.get("product")): {"count": item.get("count"), "price": float(item.get(price))}
-                for item in query_cart}
-        if not is_valid:
-            return {}
-        request.session[CART_SESSION_ID] = cart
-        return cart
+            cart = {str(item.get("product")): {"count": item.get("count"), "price": float(item.get(price))}
+                    for item in query_cart}
+            request.session[CART_SESSION_ID] = cart
+            return cart
+        else:
+            return []
     else:
-        return {}
+        return request.session[CART_SESSION_ID]
 
 
 def change_product(data, request):

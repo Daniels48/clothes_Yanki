@@ -8,7 +8,7 @@ from clothes.utilits.authenticate.send_data import data
 from clothes.others import decode_json
 from clothes.services.email import send_activate_email_message
 from users.models import User, CartProduct
-from yanki.settings import CART_SESSION_ID
+from yanki.settings import CART_SESSION_ID, LIKE_SESSION_ID, CURRENCY_SESSION_ID
 
 
 def get_user(username):
@@ -77,6 +77,8 @@ class AuthenticateMixin(View):
 
 def set_data_request(request, user):
     cart = request.session.get(CART_SESSION_ID)
+    like = request.session.get(LIKE_SESSION_ID)
+    currency = request.session.get(CURRENCY_SESSION_ID)
     if cart:
         CartProduct.objects.filter(user=user).delete()
         for key in cart:
@@ -84,6 +86,14 @@ def set_data_request(request, user):
             product = Product.objects.get(pk=int(key))
             cart_product = CartProduct.objects.create(product=product, user=user, count=count)
             cart_product.save()
+    if like:
+        list_like_int = [int(x) for x in like]
+        user.like_list.set(*list_like_int)
+        user.save()
+    if currency:
+        user.currency = currency
+        user.save()
+
 
 
 
