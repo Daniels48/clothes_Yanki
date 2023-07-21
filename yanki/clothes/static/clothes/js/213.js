@@ -1331,12 +1331,12 @@ window.onload = function () {
 				}
 
 			} else {
-				const [local_var, sign_var, old_c, new_c] = ["local", "sign", "old", "new"];
+				const [local_var, sign_var, valute] = ["local", "sign", "valute_value"];
 				const default_currency = "UAH";
 				const count_round = 2;
 				const currency = data[local_var];
 				const dates = data["data"];
-				const [old_value, new_value, sign] = [dates[old_c], dates[new_c], dates[sign_var]];
+				const [valute_value, sign] = [dates[valute], dates[sign_var]];
 				const get_value = elem => Number(elem.querySelector(".cart__count").children[1].innerText);
 
 
@@ -1379,8 +1379,9 @@ window.onload = function () {
 					const row_price = Math.round(Number(element.dataset.price.replace(",", ".")));
 					const number = row_price * val;
 					const new_price = number => Math.round(
-						(row_price * old_value) * number / new_value * +`1e${count_round}`
+						row_price * valute_value * number * +`1e${count_round}`
 					) / +`1e${count_round}`;
+					console.log(valute_value, 777777777777777)
 					let final_value = currency == default_currency ? row_price : new_price(1);
 					if (vars == "*") { final_value = currency == default_currency ? number : new_price(get_value(element)) };
 					return set_price_for_product(get_element(element), final_value, sign)

@@ -5,7 +5,6 @@ from django.db.models import Max
 from django.views import View
 from clothes.models import BaseProduct
 from clothes.others import json_response, decode_json
-from users.models import User
 from yanki.settings import CURRENCY_SESSION_ID, CART_SESSION_ID
 
 cache = {}
@@ -46,8 +45,8 @@ def get_currency_from_server():
             "CharCode": "USD",
             "Nominal": 1,
             "Name": "Доллар США",
-            "Value": 82.6417,
-            "Previous": 82.093
+            "Value": 90.3846,
+            "Previous": 90.8545
         },
         "EUR": {
             "ID": "R01239",
@@ -55,8 +54,8 @@ def get_currency_from_server():
             "CharCode": "EUR",
             "Nominal": 1,
             "Name": "Евро",
-            "Value": 89.0057,
-            "Previous": 88.0379
+            "Value": 100.6562,
+            "Previous": 101.833
         },
         "UAH": {
             "ID": "R01720",
@@ -64,8 +63,8 @@ def get_currency_from_server():
             "CharCode": "UAH",
             "Nominal": 10,
             "Name": "Украинских гривен",
-            "Value": 22.3769,
-            "Previous": 22.2267
+            "Value": 24.5935,
+            "Previous": 24.6002
         }
     }
 }
@@ -87,51 +86,27 @@ def set_currency(data, request):
     return request
 
 
-def set_currency_for_page(list_products, request):
-    def set_data(products_list):
-        for item in products_list:
-            if sign != "грн":
-                item.f_price = f"{round(float(item.parent.price) * old_vals / float(new_vals), 2)} {sign}"
-            else:
-                item.f_price = f"{int(item.parent.price)} {sign}"
-        return products_list
-
-    currency = get_currency_for_page(request)
-    sign = get_sign(currency)
-    old_vals, new_vals = get_valute(currency)
-
-    if type(list_products) != list:
-        products = set_data([list_products])
-        return products[0]
-
-    products = set_data(list_products)
-
-    return products
-
-
 class Currency(View):
     def post(self, request):
         response = send_local_data(request)
         return json_response(response)
 
 
-def get_valute(value):
+def get_valute_value(value):
     get_value = lambda val, sign: val.get(sign).get("Value") / val.get(sign).get("Nominal")
     valutes = cache["Valute"]
     new_value = get_value(valutes, value)
     old_value = get_value(valutes, base_nominal)
-    return float(old_value), float(new_value)
+    return float(old_value) / float(new_value)
 
 
 def send_local_data(request):
     currency = get_currency_for_page(request)
-    old_value, new_value = get_valute(currency)
-    sign = get_sign(currency)
-    value_sign = old_value / new_value if sign != "грн" else 1
+    valute_value = get_valute_value(currency)
     query = BaseProduct.objects.aggregate(Max('price'))
-    raw_value = int(query["price__max"]) * value_sign
+    raw_value = int(query["price__max"]) * valute_value
     return {"local": currency,
-           "data": {"new": new_value, "old": old_value, "sign": currency_list[currency], "max_price": ceil(raw_value)}}
+           "data": {"valute_value": valute_value, "sign": currency_list[currency], "max_price": ceil(raw_value)}}
 
 
 def get_number(number):
@@ -147,8 +122,8 @@ def get_raw_list_product_sum_price(request):
 
 def get_sum_products(list_sum, currency, id_product=0):
     count_round = 2
-    old_value, new_value = get_valute(currency)
-    get_value = lambda p_id: round(list_sum.get(p_id) * old_value / new_value, count_round)
+    valute_value = get_valute_value(currency)
+    get_value = lambda p_id: round(list_sum.get(p_id) * valute_value, count_round)
     list_product = {id_product: list_sum.get(id_product)} if id_product else list_sum
     row_value = sum([get_value(id_p) for id_p in list_product])
     if currency == base_nominal:

@@ -1,6 +1,6 @@
 from django.views import View
 from clothes.others import decode_json, json_response
-from clothes.utils import get_selected_products, Set_data_products
+from clothes.utils import Set_data_products, get_select_related_and_selected_fields_products
 from yanki.settings import LIKE_SESSION_ID
 
 
@@ -70,12 +70,12 @@ class Like(View):
         return json_response(obj)
 
 
-def get_list_favorite(request):
+def get_favorite_products(request):
     list_id = request.session.get(LIKE_SESSION_ID, [])
     if not list_id:
         list_id = get_like_in_bd(request)
     filters = {"parent__id__in": [*list_id]}
-    list_products = get_selected_products(filters, "catalog")
+    list_products = get_select_related_and_selected_fields_products(filters, "catalog")
     return Set_data_products(list_products, request).products
 
 

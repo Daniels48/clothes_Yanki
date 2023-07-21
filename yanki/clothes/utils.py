@@ -3,7 +3,7 @@ from re import findall
 from django.db.models import Q, F, ExpressionWrapper, Max
 from clothes.models import *
 from clothes.others import sum_products
-from clothes.set_session_data.currency import get_currency_for_page, get_list_currency, get_sign, get_valute
+from clothes.set_session_data.currency import get_currency_for_page, get_list_currency, get_sign, get_valute_value
 from users.models import CartProduct
 from yanki.settings import CURRENCY_SESSION_ID, CART_SESSION_ID, LIKE_SESSION_ID
 
@@ -41,90 +41,80 @@ class GeneralMixin(GeneralDataMixin):
     """General mixin for provide authenticate and currency"""
 
 
-def get_raw_union_products():
+def get_select_related_products():
     return Product.objects.select_related("parent", "parent__type", "size", "color")
-
-
-def get_selected_products(filters=False, types=False):
-    general_fields = ["parent__title", "parent__price", "parent__slug",
-                      "id", "parent__type__slug", "size__title", "color__hex"]
-    list_fields = {"cart": ["image_1", "count"], "catalog": ["image", "parent__tags__title"]}
-    general_fields.extend(list_fields.get(types))
-    raw_list = get_raw_union_products()
-    if not filters:
-        filters = {}
-
-    if types != "cart":
-        raw_list = raw_list.prefetch_related("parent__tags")
-
-    return raw_list.filter(**filters).only(*general_fields)
-
-
-def get_catalog_products(category, filters, request):
-    currency = get_currency_for_page(request)
-    old_vals, new_vals = get_valute(currency)
-    sign = get_sign(currency)
-    value_sign = old_vals / float(new_vals) if sign != "грн" else 1
-
-    def get_filters(data, names=False):
-        elements, list_filters = {}, {}
-        size, color, min_price, max_price = [data.get("size"), data.get("color"), data.get("min"), data.get("max")]
-        cats = [Q(parent__tags__slug=names) | Q(parent__type__slug=names)] if names else []
-        if data:
-            elements.update([("size__title__in", size.split(","))]) if size else ""
-            elements.update([("color__id__in", color.split(","))]) if color else ""
-            elements.update([("newprice__gte", int(min_price))]) if min_price else ""
-            elements.update([("newprice__lte", int(max_price))]) if max_price else ""
-        pk = "parent_id__in"
-        if data or names:
-            list_filters[pk] = Product.objects. \
-                select_related("parent", "size", "color").\
-                annotate(newprice=ExpressionWrapper(F("parent__price") * value_sign,
-                                                    output_field=models.DecimalField())).\
-                filter(*cats, **elements).values("parent_id")
-
-        return list_filters
-
-    list_filters = get_filters(filters, category)
-    list_query = get_selected_products(list_filters, "catalog")
-    return Set_data_products(list_query, request).products
 
 
 def get_list_category():
     return Tag.objects.all().only("title", "slug").union(Catalog.objects.all().only("title", "slug"), all=True)
 
 
+def get_select_related_and_selected_fields_products(filters=False, types=False):
+    select_related_products = get_select_related_products()
+    general_fields = ["parent__title", "parent__price", "parent__slug", "id", "parent__type__slug",
+                      "size__title", "color__hex"]
+    list_fields = {"cart": ["image_1", "count"], "catalog": ["image", "parent__tags__title"]}
+    general_fields.extend(list_fields.get(types))
+
+    if not filters:
+        filters = {}
+
+    if types != "cart":
+        select_related_products = select_related_products.prefetch_related("parent__tags")
+
+    return select_related_products.filter(**filters).only(*general_fields)
+
+
+def get_catalog_products(category, dict_params, request):
+    currency = get_currency_for_page(request)
+    valute_value = get_valute_value(currency)
+    sign = get_sign(currency)
+    value_sign = valute_value if sign != "грн" else 1
+
+    def get_filter(data={}, slug_category=False):
+        if data or slug_category:
+            sub_query_filters = {}
+            size, color, min_price, max_price = [data.get("size"), data.get("color"), data.get("min"), data.get("max")]
+
+            category_filters = [Q(parent__tags__slug=slug_category) | Q(parent__type__slug=slug_category)] \
+                if slug_category else []
+            sub_query_filters.update([("size__title__in", size.split(","))]) if size else ""
+            sub_query_filters.update([("color__id__in", color.split(","))]) if color else ""
+            sub_query_filters.update([("newprice__gte", int(min_price))]) if min_price else ""
+            sub_query_filters.update([("newprice__lte", int(max_price))]) if max_price else ""
+
+            new_price = ExpressionWrapper(F("parent__price") * value_sign, output_field=models.DecimalField())
+
+            list_id_subquery = get_select_related_products().annotate(newprice=new_price).\
+                filter(*category_filters, **sub_query_filters).values("parent_id")
+
+            return {"parent_id__in": list_id_subquery}
+
+        return {}
+
+    products_filter = get_filter(dict_params, category)
+    list_query = get_select_related_and_selected_fields_products(products_filter, "catalog")
+    return Set_data_products(list_query, request).products
+
+
 def get_product(name, request):
-    list_products = get_raw_union_products().filter(parent__slug=name)
-    return Set_data_products(list_products, request, False, True).product
+    list_query = get_select_related_products().filter(parent__slug=name)
+    return Set_data_products(list_query, request, False, True).product
 
 
 def get_list_for_product(request):
-    list_query = get_selected_products(types="catalog")
+    list_query = get_select_related_and_selected_fields_products(types="catalog")
     return Set_data_products(list_query, request).products
 
 
 def get_max_price(request):
     currency = get_currency_for_page(request)
-    old_vals, new_vals = get_valute(currency)
+    valute_value = get_valute_value(currency)
     sign = get_sign(currency)
-    value_sign = old_vals / new_vals if sign != "грн" else 1
+    value_sign = valute_value if sign != "грн" else 1
     query = BaseProduct.objects.aggregate(Max('price'))
     raw_value = int(query["price__max"]) * value_sign
     return ceil(raw_value)
-
-
-def sort_size(lst):
-    list_size = {"XXS": 40, "XS": 44, "S": 46, "M": 48, "L": 50, "XL": 52, "XXL": 54, "3XL": 58}
-    return sorted(lst, key=lambda elem: list_size[elem])
-
-
-def calc_color(string):
-    return sum([int(items, 16) for items in findall(r"\w{2}", string=string.upper())])
-
-
-def sort_color(lst):
-    return sorted(lst, key=lambda elem: calc_color(elem), reverse=True)
 
 
 def decorator(func):
@@ -147,8 +137,7 @@ class Set_data_products:
         self.search = search
         self.list_like = None
         self.sign = None
-        self.old_value = None
-        self.new_value = None
+        self.valute_value = None
         self.list_cateogry_obj = {}
 
         if self.one:
@@ -161,22 +150,14 @@ class Set_data_products:
             self.products = self.get_full_products()
 
     def set_currency(self, element):
-        if self.sign is None or self.old_value is None or self.new_value is None:
+        if self.sign is None or self.valute_value is None:
             currency = get_currency_for_page(self.request)
             self.sign = get_sign(currency)
-            self.old_value, self.new_value = get_valute(currency)
+            self.valute_value = get_valute_value(currency)
 
-        id_element = element.parent_id
-        if id_element not in self.list_cateogry_obj and not self.one:
-            self.set_f_price(element)
-
-        if self.one:
-            self.set_f_price(element)
-
-    def set_f_price(self, element):
         price = element.parent.price
         if self.sign != "грн":
-            element.f_price = f"{round(float(price) * self.old_value / float(self.new_value), 2)} {self.sign}"
+            element.f_price = f"{round(float(price) * self.valute_value, 2)} {self.sign}"
         else:
             element.f_price = f"{int(price)} {self.sign}"
 
@@ -184,22 +165,29 @@ class Set_data_products:
         if self.list_like is None:
             self.list_like = self.request.session.get(LIKE_SESSION_ID, [])
 
-        id_element = element.parent_id
-        if id_element not in self.list_cateogry_obj and not self.one:
-            value_like = str(id_element) in self.list_like or id_element in self.list_like
-            element.like = value_like
+        id_element = element.parent_id if not self.search else element.id
+        value_like = str(id_element) in self.list_like or id_element in self.list_like
+        element.like = value_like
 
-        if self.one:
-            value_like = str(id_element) in self.list_like or id_element in self.list_like
-            element.like = value_like
+    def sort_color(self, lst):
+        return sorted(lst, key=lambda elem: self.calc_color_weight(elem), reverse=True)
+
+    @staticmethod
+    def sort_size(lst):
+        list_size = {"XXS": 40, "XS": 44, "S": 46, "M": 48, "L": 50, "XL": 52, "XXL": 54, "3XL": 58}
+        return sorted(lst, key=lambda elem: list_size[elem])
+
+    @staticmethod
+    def calc_color_weight(string):
+        return sum([int(items, 16) for items in findall(r"\w{2}", string=string.upper())])
 
     def sort_size_and_color(self, element):
         if self.search:
-            element.size = sort_size(element.size)
-            element.color = sort_color(element.color)
+            element.size = self.sort_size(element.size)
+            element.color = self.sort_color(element.color)
         else:
-            element.size.title = sort_size(element.size.title)
-            element.color.hex = sort_color(element.color.hex)
+            element.size.title = self.sort_size(element.size.title)
+            element.color.hex = self.sort_color(element.color.hex)
 
     def sort_size_one_product(self):
         for key, value in self.list_size.items():
@@ -207,7 +195,7 @@ class Set_data_products:
         return self.list_size
 
     def sort_color_one_product(self):
-        return sorted(self.list_color, key=lambda obj: calc_color(obj.color.hex), reverse=True)
+        return sorted(self.list_color, key=lambda obj: self.calc_color_weight(obj.color.hex), reverse=True)
 
     def set_size_product(self, element):
         clr = element.color.hex
@@ -237,17 +225,7 @@ class Set_data_products:
         string = data[key]["string"]
         return "<br>".join(findall(pattern, string))
 
-    def set_full_data(self, element):
-        if self.one:
-            self.set_color_product(element)
-            self.set_size_product(element)
-        else:
-            self.set_like(element)
-            self.set_currency(element)
-            new_element = self.set_category(element)
-            self.sort_size_and_color(new_element)
-
-    def set_category(self, item):
+    def set_parent_products(self, item):
 
         if item.parent_id not in self.list_cateogry_obj:
             item.color.hex = [item.color.hex, ]
@@ -262,6 +240,18 @@ class Set_data_products:
             self.list_cateogry_obj[item.parent_id] = old_item
             return old_item
 
+    def set_full_data(self, element):
+        if self.one:
+            self.set_color_product(element)
+            self.set_size_product(element)
+        else:
+            self.set_like(element)
+            self.set_currency(element)
+            new_element = element
+            if not self.search:
+                new_element = self.set_parent_products(element)
+            self.sort_size_and_color(new_element)
+
     def get_full_products(self):
         [self.set_full_data(item) for item in self.list_products]
 
@@ -273,6 +263,9 @@ class Set_data_products:
             self.set_like(self.product)
             self.set_currency(self.product)
             return self.product
+
+        if self.search:
+            return self.list_products
 
         return list(self.list_cateogry_obj.values())
 

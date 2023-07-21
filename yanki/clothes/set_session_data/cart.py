@@ -3,9 +3,9 @@ from re import findall
 from clothes.models import Product
 from clothes.others import decode_json, get_int_count, sum_products
 from clothes.set_session_data.currency import get_local_data_for_cart, get_all_sum_or_one
-from clothes.utils import get_selected_products
+from clothes.utils import get_select_related_and_selected_fields_products
 from users.models import CartProduct
-from yanki.settings import CART_SESSION_ID, CURRENCY_SESSION_ID, LIKE_SESSION_ID
+from yanki.settings import CART_SESSION_ID, CURRENCY_SESSION_ID
 
 name_id = "id"
 name_sign = "sign"
@@ -29,7 +29,7 @@ def get_list_cart(request):
     raw_cart = get_cart_in_bd(request)
     cart = get_cart_for_local(raw_cart)
     filters = {"id__in": [*cart]}
-    products = get_selected_products(filters, CART_SESSION_ID)
+    products = get_select_related_and_selected_fields_products(filters, CART_SESSION_ID)
 
     for item in products:
         count = findall(r"\d+", str(cart.get(str(item.id))))[0]

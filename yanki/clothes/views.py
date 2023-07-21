@@ -5,10 +5,10 @@ from clothes.models import *
 from .forms import Change_person_data
 from .others import decode_json
 from .set_session_data.cart import get_list_cart, Cart
-from .set_session_data.currency import set_currency_for_page, get_all_sum_or_one
-from .set_session_data.like import get_list_favorite, set_like_cls_for_product
+from .set_session_data.currency import get_all_sum_or_one
+from .set_session_data.like import get_favorite_products
 from .utils import GeneralMixin, get_catalog_products, get_list_category, get_product, get_list_for_product, \
-    get_max_price, Set_data_products
+    get_max_price
 
 
 class ClothesHome(GeneralMixin, ListView):
@@ -40,9 +40,9 @@ class ClothesCatalog(GeneralMixin, ListView):
         context["color"] = Color.objects.all()
 
         if category:
-            cats = [catty for catty in context["catalog"] if category and category == catty.slug][0]
-            context["title"] = cats.title
-            context["category"] = cats
+            tilte_category = [name for name in context["catalog"] if category and category == name.slug][0]
+            context["title"] = tilte_category.title
+            context["category"] = tilte_category
         return context
 
 
@@ -108,7 +108,7 @@ class ClothesFavorite(GeneralMixin, ListView):
     template_name = "clothes/favorite.html"
 
     def get_queryset(self):
-        return get_list_favorite(self.request)
+        return get_favorite_products(self.request)
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
