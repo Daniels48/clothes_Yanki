@@ -1,14 +1,11 @@
 from django.http import HttpResponseNotFound, JsonResponse
 from django.views.generic import DetailView, ListView
-from yanki.settings import SITE_NAME, CART_SESSION_ID, LIKE_SESSION_ID, CURRENCY_SESSION_ID
 from clothes.models import *
 from .forms import Change_person_data
 from .others import decode_json
-from .set_session_data.cart import get_list_cart, Cart
-from .set_session_data.currency import get_all_sum_or_one
+from .set_session_data.cart import Cart
 from .set_session_data.like import get_favorite_products
-from .utils import GeneralMixin, get_catalog_products, get_list_category, get_product, get_list_for_product, \
-    get_max_price
+from .utils import GeneralMixin, get_catalog_products, get_list_category, get_product, get_list_for_product, FilterMixin
 
 
 class ClothesHome(GeneralMixin, ListView):
@@ -22,22 +19,19 @@ class ClothesHome(GeneralMixin, ListView):
         return context
 
 
-class ClothesCatalog(GeneralMixin, ListView):
+class ClothesCatalog(FilterMixin, GeneralMixin, ListView):
     model = BaseProduct
     template_name = "clothes/catalog.html"
 
     def get_queryset(self):
-        category, filters = [self.kwargs.get("category"), self.request.GET]
-        return get_catalog_products(category, filters, self.request)
+        category = self.kwargs.get("category")
+        return get_catalog_products(self.request, category)
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
         category = self.kwargs.get("category")
         context["catalog"] = get_list_category()
-        context["max"] = get_max_price(self.request)
         context["title"] = "Каталог"
-        context["size"] = Size.objects.all()
-        context["color"] = Color.objects.all()
 
         if category:
             tilte_category = [name for name in context["catalog"] if category and category == name.slug][0]
@@ -64,7 +58,7 @@ class ClothesProduct(GeneralMixin, DetailView):
 class ClothesHistory(GeneralMixin, ListView):
     model = Catalog
     template_name = "clothes/history.html"
-    extra_context = {'title': f"{SITE_NAME} | История заказов"}
+    extra_context = {'title': f"Yanki | История заказов"}
 
 
 class ClothesInfo(GeneralMixin, ListView):
@@ -93,15 +87,6 @@ class ClothesCart(Cart, GeneralMixin, ListView):
     model = Product
     template_name = "clothes/cart.html"
 
-    def get_queryset(self):
-        return get_list_cart(self.request)
-
-    def get_context_data(self, *, object_list=None, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["cart_sum"] = get_all_sum_or_one(self.request)
-        context["title"] = "Корзина"
-        return context
-
 
 class ClothesFavorite(GeneralMixin, ListView):
     model = Product
@@ -113,7 +98,7 @@ class ClothesFavorite(GeneralMixin, ListView):
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
         context["title"] = "Избранное"
-        return {**context}
+        return context
 
 
 class ClothesAbout(GeneralMixin, ListView):

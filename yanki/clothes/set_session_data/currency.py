@@ -1,4 +1,4 @@
-import re
+from re import findall
 from math import ceil
 import requests
 from django.db.models import Max
@@ -19,8 +19,11 @@ def get_list_currency(value):
     return [x for x in currency_list if x != value]
 
 
-def get_currency_for_page(request):
+def get_sign(value):
+    return currency_list.get(value)
 
+
+def get_currency_for_page(request):
     currency = request.session.get(CURRENCY_SESSION_ID, base_nominal)
     if currency == base_nominal:
         if request.user.is_authenticated:
@@ -31,8 +34,12 @@ def get_currency_for_page(request):
     return currency
 
 
-def get_sign(value):
-    return currency_list.get(value)
+def get_valute_value(value):
+    get_value = lambda val, sign: float(val.get(sign).get("Value") / val.get(sign).get("Nominal"))
+    valutes = cache["Valute"]
+    new_value = get_value(valutes, value)
+    old_value = get_value(valutes, base_nominal)
+    return old_value / new_value
 
 
 def get_currency_from_server():
@@ -86,69 +93,67 @@ def set_currency(data, request):
     return request
 
 
-class Currency(View):
-    def post(self, request):
-        response = send_local_data(request)
-        return json_response(response)
-
-
-def get_valute_value(value):
-    get_value = lambda val, sign: val.get(sign).get("Value") / val.get(sign).get("Nominal")
-    valutes = cache["Valute"]
-    new_value = get_value(valutes, value)
-    old_value = get_value(valutes, base_nominal)
-    return float(old_value) / float(new_value)
-
-
-def send_local_data(request):
+def get_max_price(request):
     currency = get_currency_for_page(request)
     valute_value = get_valute_value(currency)
     query = BaseProduct.objects.aggregate(Max('price'))
-    raw_value = int(query["price__max"]) * valute_value
-    return {"local": currency,
-           "data": {"valute_value": valute_value, "sign": currency_list[currency], "max_price": ceil(raw_value)}}
+    max_price = ceil(int(query["price__max"]) * valute_value)
+    return max_price
 
 
-def get_number(number):
-    return re.findall(r"\d+\.?\d*", str(number).replace(",", "."))[0]
+class Currency(View):
+    def post(self, request):
+        response = self.send_local_data(request)
+        return json_response(response)
+
+    def send_local_data(self, request):
+        currency = get_currency_for_page(request)
+        valute_value = get_valute_value(currency)
+        max_price = self.get_max_price(request)
+        data_dict = {"valute_value": valute_value, "sign": get_sign(currency), "max_price": max_price}
+        dict_respone = {"local": currency, "data": data_dict}
+        return dict_respone
 
 
-def get_raw_list_product_sum_price(request):
+def get_objects_cart_with_base_price_products(request):
     cart = request.session.get(CART_SESSION_ID)
+    get_number = lambda number: float(findall(r"\d+\.?\d*", str(number).replace(",", "."))[0])
     currency = get_currency_for_page(request)
-    get_value = lambda product, value: get_number(cart[product].get(value))
-    return {id_pr: float(get_value(id_pr, "count")) * float(get_value(id_pr, "price")) for id_pr in cart}, currency
+    get_value = lambda product_id, value: get_number(cart[product_id].get(value))
+    return {id_pr: get_value(id_pr, "count") * get_value(id_pr, "price") for id_pr in cart}, currency
 
 
-def get_sum_products(list_sum, currency, id_product=0):
-    count_round = 2
-    valute_value = get_valute_value(currency)
-    get_value = lambda p_id: round(list_sum.get(p_id) * valute_value, count_round)
-    list_product = {id_product: list_sum.get(id_product)} if id_product else list_sum
-    row_value = sum([get_value(id_p) for id_p in list_product])
-    if currency == base_nominal:
-        return int(row_value)
-    else:
-        fvalue = round(row_value, count_round)
-        if str(fvalue).split(".")[1] == "0":
-            return int(fvalue)
-        return fvalue
-
-
-def get_all_sum_or_one(request, id_product=0):
+def get_sum_all_objects_cart_with_currency_price_or_one(request, id_product=0):
     if request.session.get(CART_SESSION_ID):
-        cart, currency = get_raw_list_product_sum_price(request)
-        return get_sum_products(cart, currency, id_product)
-    else:
-        return 0
+        cart, currency = get_objects_cart_with_base_price_products(request)
+        count_round = 2
+        valute_value = get_valute_value(currency)
+
+        get_base_price = lambda product_id: cart.get(product_id)
+        get_price_on_currency = lambda product_id: round(get_base_price(product_id) * valute_value, count_round)
+
+        list_product = {id_product: get_base_price(id_product)} if id_product else cart
+
+        price_cart = sum([get_price_on_currency(id_product) for id_product in list_product])
+
+        if currency == base_nominal:
+            return int(price_cart)
+
+        round_price_cart = round(price_cart, count_round)
+        is_end_zero = str(round_price_cart).split(".")[1] == "0"
+
+        if is_end_zero:
+            return int(round_price_cart)
+
+        return round_price_cart
+    return 0
 
 
-def get_local_data_for_cart(request, id_product):
+def get_dict_response_for_cart(request, id_product):
     currency = get_currency_for_page(request)
     sign = decode_json(request.body).get("sign")
-    cart = request.session.get(CART_SESSION_ID)
-    all_sum = get_all_sum_or_one(request) if cart else 0
-    sum_product = 0 if sign == "delete" else get_all_sum_or_one(request, id_product)
+    all_sum = get_sum_all_objects_cart_with_currency_price_or_one(request)
+    sum_product = 0 if sign == "delete" else get_sum_all_objects_cart_with_currency_price_or_one(request, id_product)
     return {"sum_cart": all_sum, "product": {"id": id_product, "sum": sum_product, "sign": get_sign(currency)}}
 
 

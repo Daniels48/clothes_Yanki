@@ -4,70 +4,76 @@ from clothes.utils import Set_data_products, get_select_related_and_selected_fie
 from yanki.settings import LIKE_SESSION_ID
 
 
-def set_like(data, request):
-    like = data.get(LIKE_SESSION_ID)
-    if like:
-        request.session[LIKE_SESSION_ID] = change_like(like, request)
-        if not request.session[LIKE_SESSION_ID]:
-            del request.session[LIKE_SESSION_ID]
-    return request
-
-
 def get_like_in_bd(request):
-    if request.user.is_authenticated:
-        like_list = list(request.user.like_list.values_list("id", flat=True))
-        request.session[LIKE_SESSION_ID] = like_list
-        return like_list
-    else:
-        return []
-
-
-def change_like(data, request):
     list_like = request.session.get(LIKE_SESSION_ID, [])
-
-    is_authenticated = request.user.is_authenticated
-
     if not list_like:
-        list_like = get_like_in_bd(request)
-
-    product_id = data.get("id")
-    sign = data.get("sign")
-
-    if sign == "+":
-        if product_id not in list_like:
-            list_like.append(product_id)
-            if is_authenticated:
-                request.user.like_list.add(product_id)
-
-    if sign == "delete":
-        if product_id in list_like:
-            list_like.remove(product_id)
-            if is_authenticated:
-                request.user.like_list.remove(product_id)
-
+        if request.user.is_authenticated:
+            list_like = list(request.user.like_list.values_list("id", flat=True))
     return list_like
+
+
+def set_like(data, request):
+    like_local = [int(x) for x in data.get(LIKE_SESSION_ID)]
+    if like_local:
+        like_bd = [int(x) for x in get_like_in_bd(request)]
+        new_like_list = list(set([*like_bd, *like_local]))
+        request.session[LIKE_SESSION_ID] = new_like_list
+    return request
 
 
 class Like(View):
     def post(self, request):
         data = decode_json(request.body)
-        like = data.get(LIKE_SESSION_ID)
-        sign = like.get("sign")
-        id_product = like.get("id")
-        where_add = like.get("where_add")
-        list_like = request.session.get(LIKE_SESSION_ID, [])
-        val = "true"
-        if sign == "+":
-            if id_product not in list_like:
-                val = "false"
-        if sign == "delete":
-            if id_product in list_like:
-                val = "false"
+        product_change_request = data.get(LIKE_SESSION_ID)
+        dict_response = self.change_like(product_change_request)
+        return json_response(dict_response)
 
-        obj = {LIKE_SESSION_ID: {"command": val, "sign": sign, "id": id_product,
-                                 "list_like": list_like, "where_add": where_add}}
+    def change_like(self, data):
+        list_like = get_like_in_bd(self.request)
 
-        return json_response(obj)
+        valid_change = "true"
+        product_id = int(data.get("id"))
+        sign = data.get("sign")
+        where_add = data.get("where_add")
+
+        dict_func = {"+": self.add_product, "delete": self.remove_product}
+
+        func = dict_func[sign]
+
+        list_like, valid_change = func(list_like, product_id, valid_change)
+
+        dict_response = {LIKE_SESSION_ID:
+                             {"command": valid_change, "sign": sign, "id": product_id, "list_like": list_like,
+                              "where_add": where_add
+                              }
+                         }
+
+        self.request.session[LIKE_SESSION_ID] = list_like
+        return dict_response
+
+    def add_product(self, list_like, product_id, valid_change):
+        if product_id not in list_like:
+            list_like.append(product_id)
+
+            if product_id not in list_like:
+                valid_change = "false"
+
+            if self.request.user.is_authenticated:
+                self.request.user.like_list.add(product_id)
+
+        return list_like, valid_change
+
+    def remove_product(self, list_like, product_id, valid_change):
+        if product_id in list_like:
+            list_like.remove(product_id)
+
+            if product_id in list_like:
+                valid_change = "false"
+
+            if self.request.user.is_authenticated:
+                self.request.user.like_list.remove(product_id)
+
+        return list_like, valid_change
 
 
 def get_favorite_products(request):
@@ -77,16 +83,3 @@ def get_favorite_products(request):
     filters = {"parent__id__in": [*list_id]}
     list_products = get_select_related_and_selected_fields_products(filters, "catalog")
     return Set_data_products(list_products, request).products
-
-
-def set_like_cls_for_product(list_product, request):
-    list_like = request.session.get(LIKE_SESSION_ID, [])
-    set_like = lambda x: str(x.parent.id) in list_like
-
-    if type(list_product) != list:
-        list_product.like = set_like(list_product)
-        return list_product
-
-    for x in list_product:
-        x.like = set_like(x)
-    return list_product

@@ -42,6 +42,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 #     delivery_method = models.ForeignKey("Delivery_methods", related_name="deliverys_method", on_delete=models.CASCADE)
 #     phone = models.CharField(max_length=255)
 #     pay_method = models.ForeignKey("Pay_methods", related_name="pays_method", on_delete=models.CASCADE)
+#     status_pay = models.ForeingKey("Pay_status",on_delete=models.CASCADE)
 #     status = models.ForeignKey("Pay_methods", on_delete=models.CASCADE, default=1)
 #     sum_order = models.DecimalField(max_digits=10, decimal_places=2)
 #     currency = models.CharField(max_length=15)

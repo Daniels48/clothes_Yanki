@@ -4,7 +4,7 @@ from django.urls import path, include
 from yanki import settings
 from clothes.utilits.authenticate.authenticate import AuthenticateMixin
 from .forms import get_cities
-from .set_session_data.Others import Set_local_data
+from .set_session_data.init_session import get_local_data
 from .set_session_data.currency import Currency
 from .set_session_data.like import Like
 from .utilits.GlobalSearch import ClothesSearch
@@ -21,7 +21,7 @@ urlpatterns = [
                   path("favorite/", ClothesFavorite.as_view(), name="favorite"),
                   path("logout/", LogoutView.as_view(), name="logout"),
                   path("cart/", ClothesCart.as_view(), name="cart"),
-                  path("session/", Set_local_data.as_view(), name="session"),
+                  path("session/", get_local_data.as_view(), name="session"),
                   path("authenticate/", AuthenticateMixin.as_view(), name="authenticate"),
                   path("search/", ClothesSearch.as_view(), name="search"),
                   path("currency/", Currency.as_view(), name="authenticate"),

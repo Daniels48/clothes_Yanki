@@ -1433,7 +1433,7 @@ window.onload = function () {
 		const where_add = lst_product ? 1 : 0;
 		const icon = lst_product ? button.querySelector(".info-product__icon-love") : button;
 		const sign_request = get_sign_operation(icon);
-		const request = { "local": "True" };
+		const request = {};
 		request[global_like] = { "id": id_product, "sign": sign_request, "where_add": where_add };
 
 

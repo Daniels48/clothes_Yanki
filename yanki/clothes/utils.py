@@ -1,28 +1,10 @@
-from math import ceil
 from re import findall
-from django.db.models import Q, F, ExpressionWrapper, Max
+from django.db.models import Q, F, ExpressionWrapper
 from clothes.models import *
 from clothes.others import sum_products
-from clothes.set_session_data.currency import get_currency_for_page, get_list_currency, get_sign, get_valute_value
-from users.models import CartProduct
+from clothes.set_session_data.currency import get_currency_for_page, get_list_currency, get_sign, get_valute_value, \
+    get_max_price
 from yanki.settings import CURRENCY_SESSION_ID, CART_SESSION_ID, LIKE_SESSION_ID
-
-
-def get_cart_in_bd(request):
-    if not request.session.get(CART_SESSION_ID):
-        if request.user.is_authenticated:
-            price = "product__parent__price"
-            query_cart = CartProduct.objects.filter(user=request.user). \
-                select_related("product__parent").values("product", "count", price)
-
-            cart = {str(item.get("product")): {"count": item.get("count"), "price": float(item.get(price))}
-                    for item in query_cart}
-            request.session[CART_SESSION_ID] = cart
-            return cart
-        else:
-            return []
-    else:
-        return request.session.get(CART_SESSION_ID, [])
 
 
 class GeneralDataMixin:
@@ -32,13 +14,22 @@ class GeneralDataMixin:
         context[CURRENCY_SESSION_ID] = currency
         context["sign"] = get_sign(currency)
         context["currency_other"] = get_list_currency(currency)
-        count = get_cart_in_bd(self.request)
-        context["cart_count"] = sum_products(count)
+        cart = self.request.session.get(CART_SESSION_ID, [])
+        context["cart_count"] = sum_products(cart)
         return context
 
 
 class GeneralMixin(GeneralDataMixin):
     """General mixin for provide authenticate and currency"""
+
+
+class FilterMixin:
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["size"] = Size.objects.all()
+        context["color"] = Color.objects.all()
+        context["max"] = get_max_price(self.request)
+        return context
 
 
 def get_select_related_products():
@@ -65,35 +56,32 @@ def get_select_related_and_selected_fields_products(filters=False, types=False):
     return select_related_products.filter(**filters).only(*general_fields)
 
 
-def get_catalog_products(category, dict_params, request):
-    currency = get_currency_for_page(request)
-    valute_value = get_valute_value(currency)
-    sign = get_sign(currency)
-    value_sign = valute_value if sign != "грн" else 1
+def get_catalog_products(request, category):
+    filter_parent = {}
+    dict_params = request.GET
 
-    def get_filter(data={}, slug_category=False):
-        if data or slug_category:
-            sub_query_filters = {}
-            size, color, min_price, max_price = [data.get("size"), data.get("color"), data.get("min"), data.get("max")]
+    if dict_params or category:
+        currency = get_currency_for_page(request)
+        valute_value = get_valute_value(currency)
 
-            category_filters = [Q(parent__tags__slug=slug_category) | Q(parent__type__slug=slug_category)] \
-                if slug_category else []
-            sub_query_filters.update([("size__title__in", size.split(","))]) if size else ""
-            sub_query_filters.update([("color__id__in", color.split(","))]) if color else ""
-            sub_query_filters.update([("newprice__gte", int(min_price))]) if min_price else ""
-            sub_query_filters.update([("newprice__lte", int(max_price))]) if max_price else ""
+        sub_query_filters = {}
+        size, color, min_price, max_price = [dict_params.get("size"), dict_params.get("color"),
+                                             dict_params.get("min"), dict_params.get("max")]
 
-            new_price = ExpressionWrapper(F("parent__price") * value_sign, output_field=models.DecimalField())
+        category_filters = [Q(parent__tags__slug=category) | Q(parent__type__slug=category)] if category else []
+        sub_query_filters.update([("size__title__in", size.split(","))]) if size else ""
+        sub_query_filters.update([("color__id__in", color.split(","))]) if color else ""
+        sub_query_filters.update([("newprice__gte", int(min_price))]) if min_price else ""
+        sub_query_filters.update([("newprice__lte", int(max_price))]) if max_price else ""
 
-            list_id_subquery = get_select_related_products().annotate(newprice=new_price).\
-                filter(*category_filters, **sub_query_filters).values("parent_id")
+        new_price = ExpressionWrapper(F("parent__price") * valute_value, output_field=models.DecimalField())
 
-            return {"parent_id__in": list_id_subquery}
+        list_id_subquery = get_select_related_products().annotate(newprice=new_price). \
+            filter(*category_filters, **sub_query_filters).values("parent_id")
 
-        return {}
+        filter_parent["parent_id__in"] = list_id_subquery
 
-    products_filter = get_filter(dict_params, category)
-    list_query = get_select_related_and_selected_fields_products(products_filter, "catalog")
+    list_query = get_select_related_and_selected_fields_products(filter_parent, "catalog")
     return Set_data_products(list_query, request).products
 
 
@@ -105,16 +93,6 @@ def get_product(name, request):
 def get_list_for_product(request):
     list_query = get_select_related_and_selected_fields_products(types="catalog")
     return Set_data_products(list_query, request).products
-
-
-def get_max_price(request):
-    currency = get_currency_for_page(request)
-    valute_value = get_valute_value(currency)
-    sign = get_sign(currency)
-    value_sign = valute_value if sign != "грн" else 1
-    query = BaseProduct.objects.aggregate(Max('price'))
-    raw_value = int(query["price__max"]) * value_sign
-    return ceil(raw_value)
 
 
 def decorator(func):
