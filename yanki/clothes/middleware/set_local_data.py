@@ -32,15 +32,15 @@ def set_like_in_bd(request):
 
 def set_cart_in_bd(request):
     cart = request.session.get(CART_SESSION_ID)
-    if not cart:
+    if type(cart) != dict:
         price = "product__parent__price"
-        query_cart = CartProduct.objects.filter(user=request.user).select_related("product__parent"). \
-            values("product", "count", price)
+        query_cart = list(CartProduct.objects.filter(user=request.user).select_related("product__parent"). \
+                          values("product", "count", price))
+
         get_key_product = lambda item: str(item.get("product"))
         get_value_product = lambda item: {"count": item.get("count"), "price": float(item.get(price))}
-        if query_cart:
-            session_cart = {get_key_product(item): get_value_product(item) for item in query_cart}
-            request.session[CART_SESSION_ID] = session_cart
+        session_cart = {get_key_product(item): get_value_product(item) for item in query_cart}
+        request.session[CART_SESSION_ID] = session_cart
 
 
 def set_local_data(get_response):

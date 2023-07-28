@@ -109,7 +109,7 @@ class Currency(View):
     def send_local_data(self, request):
         currency = get_currency_for_page(request)
         valute_value = get_valute_value(currency)
-        max_price = self.get_max_price(request)
+        max_price = get_max_price(request)
         data_dict = {"valute_value": valute_value, "sign": get_sign(currency), "max_price": max_price}
         dict_respone = {"local": currency, "data": data_dict}
         return dict_respone

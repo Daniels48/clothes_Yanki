@@ -1,7 +1,6 @@
 from django.db import models
 from django.db.models import UniqueConstraint
 from django.urls import reverse
-from django_cte import CTEManager
 
 
 class Catalog(models.Model):
@@ -22,7 +21,6 @@ class Catalog(models.Model):
 
 
 class BaseProduct(models.Model):
-    objects = CTEManager()
     title = models.CharField(max_length=255, db_index=True)
     slug = models.SlugField(max_length=255, unique=True)
     price = models.DecimalField(max_digits=7, decimal_places=2)
@@ -44,7 +42,6 @@ class BaseProduct(models.Model):
 
 
 class Product(models.Model):
-    objects = CTEManager()
     parent = models.ForeignKey("BaseProduct", related_name="products", on_delete=models.CASCADE)
     image = models.ImageField(upload_to="image/products")
     image_1 = models.ImageField(upload_to="image/products", blank=True)

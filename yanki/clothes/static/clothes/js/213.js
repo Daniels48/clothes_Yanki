@@ -12,7 +12,7 @@ window.onload = function () {
 	const head_search = document.querySelector(".search__input");
 	head_search.addEventListener("keyup", search_keyup);
 
-	async function search_keyup(e) {
+	function search_keyup(e) {
 		const inp_value = head_search.value;
 		const cls_unview = "unview"
 		const cls = "searchsub__item";
@@ -71,7 +71,7 @@ window.onload = function () {
 				const request = {};
 				request["keyup_search"] = inp_value;
 				const response = send_data_on_server(request, url);
-				await get_data_in_promise(response, true_response, false_response)
+				get_data_in_promise(response, true_response, false_response, 0)
 			} else {
 				clear__elements();
 				unview_elements("add");
@@ -540,7 +540,7 @@ window.onload = function () {
 		}
 
 		//---------------------------------------------change_lk------------------------------------------------//
-		async function change_lk_data(object) {
+		function change_lk_data(object) {
 			e.preventDefault();
 			const btn_input = object.firstElementChild;
 			const request = {};
@@ -551,7 +551,7 @@ window.onload = function () {
 				const str_url = "profile/info";
 				const url = get_global_url(str_url);
 				const response = send_data_on_server(request, url);
-				await get_data_in_promise(response, success_fnc, false_fnc)
+				get_data_in_promise(response, success_fnc, false_fnc)
 				btn_input.value = "ИЗМЕНИТЬ ИНФОРМАЦИЮ";
 			} else {
 				btn_input.value = "ОБНОВИТЬ ИНФОРМАЦИЮ";
@@ -583,7 +583,7 @@ window.onload = function () {
 		//-----------------------------------------------------------------------------------------------------//
 
 
-		async function change_products_for_search(obj, isEnter_filters, url_set) {
+		function change_products_for_search(obj, isEnter_filters) {
 			const is_search = "search";
 			const isNotEmptyFilters = window.location.href.match(/\?(.+)/);
 			const head_url = window.location.href.split(`/${is_search}/`)[1];
@@ -593,7 +593,7 @@ window.onload = function () {
 				const request = get_request(obj, isEnter_filters);
 				const url = get_global_url(is_search);
 				const response = send_data_on_server(request, url);
-				await get_data_in_promise(response, success_fnc, false_fnc)
+				get_data_in_promise(response, success_fnc, false_fnc)
 
 				function success_fnc(data) {
 					const products_query = data.products;
@@ -819,346 +819,348 @@ window.onload = function () {
 			}
 
 		}
-	});
-	//-------------------------------------------------------------------------------------------------------//
 
-	//-------------------------------------------authenticate-------------------------------------------------//
-	async function aunthetification(type, button_next = false) {
-		const cls = "unview";
-		if (type != "reset") {
-			const raw_url = "authenticate";
-			const url = get_global_url(raw_url);
-			const method_local = button_next ? button_next.parentNode.dataset.type : type;
-			const request = { "type": method_local };
-			const time_after_reg_or_chge_pass = 3000;
+		//-------------------------------------------authenticate-------------------------------------------------//
+		function aunthetification(type, button_next = false) {
+			const cls = "unview";
+			if (type != "reset") {
+				const raw_url = "authenticate";
+				const url = get_global_url(raw_url);
+				const method_local = button_next ? button_next.parentNode.dataset.type : type;
+				const request = { "type": method_local };
+				const time_after_reg_or_chge_pass = 3000;
 
-			if (button_next) {
-				const text_error_fields = "Не заполнено одно или несколько полей!";
-				const text_error_email = "Некорректный email!";
-				const login = document.querySelector(".modals__inpt.modals__item");
-				const password = document.querySelector(".modals__input.modals__psw.modals__item");
+				if (button_next) {
+					const text_error_fields = "Не заполнено одно или несколько полей!";
+					const text_error_email = "Некорректный email!";
+					const login = document.querySelector(".modals__inpt.modals__item");
+					const password = document.querySelector(".modals__input.modals__psw.modals__item");
 
-				if (!ValidField(login) && !ValidField(password, true)) {
-					set_error_data(text_error_fields);
-					return false
-				}
-
-				if (method_local == "11" || method_local == "21") {
-					const EMAIL_REGEXP = /^(([^<>()[\].,;:\s@"]+(\.[^<>()[\].,;:\s@"]+)*)|(".+"))@(([^<>()[\].,;:\s@"]+\.)+[^<>()[\].,;:\s@"]{2,})$/iu;
-					const isEmailValid = email => EMAIL_REGEXP.test(email);
-					if (!isEmailValid(login.value)) {
-						set_error_data(text_error_email);
+					if (!ValidField(login) && !ValidField(password, true)) {
+						set_error_data(text_error_fields);
 						return false
 					}
+
+					if (method_local == "11" || method_local == "21") {
+						const EMAIL_REGEXP = /^(([^<>()[\].,;:\s@"]+(\.[^<>()[\].,;:\s@"]+)*)|(".+"))@(([^<>()[\].,;:\s@"]+\.)+[^<>()[\].,;:\s@"]{2,})$/iu;
+						const isEmailValid = email => EMAIL_REGEXP.test(email);
+						if (!isEmailValid(login.value)) {
+							set_error_data(text_error_email);
+							return false
+						}
+					}
+
+					request["login"] = login.value;
+					request["password"] = password.value;
+
+					function ValidField(item, pass = false) {
+						const vals = pass ? item.parentNode : item;
+						if (!vals.value) { return false };
+						return vals.value.length >= 4 && !vals.classList.contains(cls);
+					}
+
+					function set_error_data(str) {
+						const error = document.querySelector(".modals__error");
+						error.classList.remove(cls);
+						error.innerText = str;
+					}
 				}
 
-				request["login"] = login.value;
-				request["password"] = password.value;
+				const response = send_data_on_server(request, url);
+				get_data_in_promise(response, receive_data, error_receive);
 
-				function ValidField(item, pass = false) {
-					const vals = pass ? item.parentNode : item;
-					if (!vals.value) { return false };
-					return vals.value.length >= 4 && !vals.classList.contains(cls);
+				function receive_data(response) {
+					const data = response.data;
+					if (data != 0) {
+						for (let item in data) {
+							for (let vals in data[item]) {
+								const method = vals;
+								const value = data[item][vals];
+								methods_data(method, item, value);
+							}
+						}
+					}
+
+					if (response.success == "yes") { window.location.reload(true) }
+
+					function methods_data(method, elem, vals) {
+						elem = elem == "pass" & (method == "placeholder" || method == "value") ? "first" : elem;
+						const items = get_modals_item();
+
+						if (method == "text") { items[elem].innerText = vals };
+						if (method == "del") { items[elem].classList.remove(vals) };
+						if (method == "add") { items[elem].classList.add(vals) };
+						if (method == "value") { items[elem].value = vals };
+						if (method == "placeholder") { items[elem].placeholder = vals };
+						if (method == "type") { items[elem].parentNode.dataset.type = vals };
+						if (method == "time") { setTimeout(() => { window.location.reload(true) }, time_after_reg_or_chge_pass); }
+					}
+
 				}
 
-				function set_error_data(str) {
-					const error = document.querySelector(".modals__error");
-					error.classList.remove(cls);
-					error.innerText = str;
+				function error_receive(response) { }
+			} else {
+				const modals = document.querySelector(".modals");
+				if (modals) {
+					modals.classList.remove("_enter");
+					const items = get_modals_item();
+					items["title"].innerText = "Авторизация";
+					items["title"].classList.remove(cls, "modals__margin",);
+					items["text"].classList.remove("modals__margin", "modals__none");
+					items["text"].classList.add(cls);
+					items["text"].value = "";
+					items["email"].classList.remove(cls);
+					items["email"].placeholder = "Ваш e-mail*";
+					items["email"].value = "";
+					items["pass"].classList.remove(cls);
+					items["first"].placeholder = "Ваш пароль*";
+					items["first"].value = "";
+					items["ul"].classList.remove(cls);
+					items["button"].classList.remove(cls);
+					items["button"].value = "ВОЙТИ";
+					items["error"].value = "";
+					items["error"].classList.add(cls);
+					items["title"].parentNode.dataset.type = "0";
 				}
 			}
 
-			const response = send_data_on_server(request, url);
-			console.log(request, 777777777)
-			get_data_in_promise(response, receive_data, error_receive);
+			function get_modals_item() {
+				const items = {}
+				items["title"] = document.querySelector(".modals__title");
+				items["text"] = document.querySelector(".modals__text");
+				items["email"] = document.querySelector(".modals__inpt.modals__item");
+				items["pass"] = document.querySelector(".modals__pass");
+				items["ul"] = document.querySelector(".modals__ul");
+				items["button"] = document.querySelector(".modals__submit");
+				items["first"] = document.querySelector(".modals__input.modals__psw.modals__item");
+				items["error"] = document.querySelector(".modals__error");
+				return items
+			}
+		}
+		//-----------------------------------------------------------------------------------------------------//
 
-			function receive_data(response) {
-				const data = response.data;
-				if (data != 0) {
-					for (let item in data) {
-						for (let vals in data[item]) {
-							const method = vals;
-							const value = data[item][vals];
-							methods_data(method, item, value);
+		//--------------------------------------------------cart-------------------------------------------------//
+		function change_cart(button, sign, where_change = false) {
+			const [cart_products, cart_count, cart_null] = ["products", "count", "Null"];
+			const [change_cart, response_command] = ["change_cart", "command"];
+			const [regexp_int, regexp_max] = [/\d+/g, /\d+M/g];
+			const max_product = "Max";
+			const url = get_global_url(global_cart);
+			const bool = where_change ? "0" : "1";
+			const set_request = (id, sign) => { return { "id": id, "sign": sign, "get_currency": bool } };
+
+
+			if (where_change) {
+				const lst_cls = {
+					"nent": "_non_enter", "nsel": "non_select", "hld": "hold",
+					"ab": "animation_button", "lst": "last", "fz": "fsize"
+				};
+				const text_choose_size = document.querySelector(".info-product__choose-text");
+				const border_text = text_choose_size.parentNode;
+
+				if (text_choose_size.innerText == "Выберите размер") {
+					border_add_cls();
+					after_animation_border(false);
+				} else {
+					change_block_button(button, true);
+					const id = String(document.querySelector("[data-id]").dataset.id);
+					const request = set_request(id, sign);
+					const response = send_data_on_server(request, url);
+					get_data_in_promise(response, response_success, response_fail)
+
+					function response_success(data) {
+						const command = data[response_command];
+						const raw_cart = data[change_cart];
+						const count_in_cart = raw_cart[cart_count];
+						const [validate, value] = get_validate_count(id, sign, command);
+
+						if (!validate) {
+
+							if (value == 0) {
+							}
+
+							if (value == max_product) {
+								const last_size = document.querySelector(".last__size");
+								border_add_cls();
+								last_size.classList.add(lst_cls["lst"], lst_cls["fz"]);
+								after_animation_border(last_size)
+							}
+						}
+						change_block_button(button, false, raw_cart, count_in_cart);
+					}
+
+					function response_fail(data) {
+					}
+
+					function change_block_button(button, forward, raw_cart = false, count_in_cart = false) {
+						button.classList.add(lst_cls["hld"], lst_cls["ab"]);
+						button.disable = true;
+						if (!forward) {
+							button.classList.remove(lst_cls["hld"], lst_cls["ab"]);
+							button.addEventListener("transitionend", () => {
+								final_set_data(raw_cart, count_in_cart);
+								button.disabled = false;
+							});
 						}
 					}
 				}
 
-				if (response.success == "yes") { window.location.reload(true) }
-
-				function methods_data(method, elem, vals) {
-					elem = elem == "pass" & (method == "placeholder" || method == "value") ? "first" : elem;
-					const items = get_modals_item();
-
-					if (method == "text") { items[elem].innerText = vals };
-					if (method == "del") { items[elem].classList.remove(vals) };
-					if (method == "add") { items[elem].classList.add(vals) };
-					if (method == "value") { items[elem].value = vals };
-					if (method == "placeholder") { items[elem].placeholder = vals };
-					if (method == "type") { items[elem].parentNode.dataset.type = vals };
-					if (method == "time") { setTimeout(() => { window.location.reload(true) }, time_after_reg_or_chge_pass); }
+				function after_animation_border(max) {
+					const list_elem = max ? [border_text, max] : [border_text];
+					border_text.addEventListener("transitionend", () => {
+						list_elem.forEach(elem => elem.classList.remove(lst_cls["nsel"], lst_cls["fz"]))
+					});
 				}
 
-			}
-
-			function error_receive(response) { }
-		} else {
-			const modals = document.querySelector(".modals");
-			if (modals) {
-				modals.classList.remove("_enter");
-				const items = get_modals_item();
-				items["title"].innerText = "Авторизация";
-				items["title"].classList.remove(cls, "modals__margin",);
-				items["text"].classList.remove("modals__margin", "modals__none");
-				items["text"].classList.add(cls);
-				items["text"].value = "";
-				items["email"].classList.remove(cls);
-				items["email"].placeholder = "Ваш e-mail*";
-				items["email"].value = "";
-				items["pass"].classList.remove(cls);
-				items["first"].placeholder = "Ваш пароль*";
-				items["first"].value = "";
-				items["ul"].classList.remove(cls);
-				items["button"].classList.remove(cls);
-				items["button"].value = "ВОЙТИ";
-				items["error"].value = "";
-				items["error"].classList.add(cls);
-				items["title"].parentNode.dataset.type = "0";
-			}
-		}
-
-		function get_modals_item() {
-			const items = {}
-			items["title"] = document.querySelector(".modals__title");
-			items["text"] = document.querySelector(".modals__text");
-			items["email"] = document.querySelector(".modals__inpt.modals__item");
-			items["pass"] = document.querySelector(".modals__pass");
-			items["ul"] = document.querySelector(".modals__ul");
-			items["button"] = document.querySelector(".modals__submit");
-			items["first"] = document.querySelector(".modals__input.modals__psw.modals__item");
-			items["error"] = document.querySelector(".modals__error");
-			return items
-		}
-	}
-	//-----------------------------------------------------------------------------------------------------//
-
-	//--------------------------------------------------cart-------------------------------------------------//
-	async function change_cart(button, sign, where_change = false) {
-		const [cart_products, cart_count, cart_null] = ["products", "count", "Null"];
-		const [change_cart, response_command] = ["change_cart", "command"];
-		const [regexp_int, regexp_max] = [/\d+/g, /\d+M/g];
-		const max_product = "Max";
-		const url = get_global_url(global_cart);
-		const bool = where_change ? "0" : "1";
-		const set_request = (id, sign) => { return { "id": id, "sign": sign, "get_currency": bool } };
+				function border_add_cls() {
+					border_text.classList.add(lst_cls["nent"], lst_cls["nsel"]);
+				}
 
 
-		if (where_change) {
-			const lst_cls = {
-				"nent": "_non_enter", "nsel": "non_select", "hld": "hold",
-				"ab": "animation_button", "lst": "last", "fz": "fsize"
-			};
-			const text_choose_size = document.querySelector(".info-product__choose-text");
-			const border_text = text_choose_size.parentNode;
-
-			if (text_choose_size.innerText == "Выберите размер") {
-				border_add_cls();
-				after_animation_border(false);
 			} else {
-				change_block_button(button, true);
-				const id = String(document.querySelector("[data-id]").dataset.id);
+				change_block(button, 0, true);
+				const id = get_element(button, "id");
+				set_currency(false, false, id);
 				const request = set_request(id, sign);
-				await others_func_for_send_and_receive_data(request, url, response_success, response_fail)
+				let count_product = 0;
+				const response = send_data_on_server(request, url);
+				get_data_in_promise(response, response_true, response_false)
 
-				function response_success(data) {
+				function response_true(data) {
 					const command = data[response_command];
 					const raw_cart = data[change_cart];
-					const count_in_cart = raw_cart[cart_count];
-					const [validate, value] = get_validate_count(id, sign, command);
+					const count_in_cart = raw_cart != cart_null ? raw_cart[cart_count] : 0;
+					const currency = data[global_currency];
 
-					if (!validate) {
+					if (command != del) {
+						const [validate, value] = get_validate_count(id, sign, command);
 
-						if (value == 0) {
+						if (validate) {
+							let number = value;
+							const max = get_data_in_str(value, regexp_max) ? true : false;
+							if (max) { number = get_data_in_str(value, regexp_int)[0] }
+							else { }
+
+							set_count_on_listen(button, sign, number)
+
+							function set_count_on_listen(button, sign, value) {
+								const item = get_element(button, sign);
+								item.innerText = value;
+							}
+
+						} else { }
+						count_product = value;
+					} else {
+						if (raw_cart != cart_null) { }
+						else {
+							const element = document.querySelector(".cart__wrapper");
+							element.innerHTML = data["None_cart"];
 						}
+						get_element(button).remove();
+					}
 
-						if (value == max_product) {
-							const last_size = document.querySelector(".last__size");
-							border_add_cls();
-							last_size.classList.add(lst_cls["lst"], lst_cls["fz"]);
-							after_animation_border(last_size)
+					change_block(button, count_product);
+					final_set_data(raw_cart, count_in_cart);
+					set_currency(currency, true);
+				}
+
+				function response_false(data) {
+
+				}
+
+				function change_block(element, cnt, all = false) {
+					const cls = "non_enter";
+					const obj = get_element(element, "+");
+					const minus = obj.previousElementSibling;
+					const plus = obj.nextElementSibling;
+					const btn_del = get_element(element, del);
+
+					if (all) {
+						disable(minus, true);
+						disable(plus, true)
+						disable(btn_del, true)
+					} else {
+						const block = get_data_in_str(cnt, regexp_max);
+						const count = Number(get_data_in_str(cnt, regexp_int)[0]);
+						if (count != 0) {
+							if (count > 1) { disable(minus, false) };
+							if (count == 1) { disable(minus, true) };
+						}
+						if (block) { disable(plus, true) };
+						if (!block) { disable(plus, false) };
+						if (btn_del) { disable(btn_del, false) };
+					}
+
+					function disable(element, add) {
+						if (add) {
+							element.classList.add(cls);
+							element.disabled = true;
+						}
+						else {
+							element.classList.remove(cls);
+							element.disabled = false;
 						}
 					}
-					change_block_button(button, false, raw_cart, count_in_cart);
 				}
+			}
 
-				function response_fail(data) {
-				}
-
-				function change_block_button(button, forward, raw_cart = false, count_in_cart = false) {
-					button.classList.add(lst_cls["hld"], lst_cls["ab"]);
-					button.disable = true;
-					if (!forward) {
-						button.classList.remove(lst_cls["hld"], lst_cls["ab"]);
-						button.addEventListener("transitionend", () => {
-							final_set_data(raw_cart, count_in_cart);
-							button.disabled = false;
-						});
+			function get_validate_count(id, sign, new_value) {
+				const full_data_cart = get_localItem(global_cart);
+				if (full_data_cart) {
+					const list_products = full_data_cart[cart_products];
+					if (String(new_value) == String(list_products[id])) {
+						return [false, max_product]
 					}
-				}
-			}
-
-			function after_animation_border(max) {
-				const list_elem = max ? [border_text, max] : [border_text];
-				border_text.addEventListener("transitionend", () => {
-					list_elem.forEach(elem => elem.classList.remove(lst_cls["nsel"], lst_cls["fz"]))
-				});
-			}
-
-			function border_add_cls() {
-				border_text.classList.add(lst_cls["nent"], lst_cls["nsel"]);
-			}
-
-
-		} else {
-			change_block(button, 0, true);
-			const id = get_element(button, "id");
-			set_currency(false, false, id);
-			const request = set_request(id, sign);
-			let count_product = 0;
-			await others_func_for_send_and_receive_data(request, url, response_true, response_false);
-
-			function response_true(data) {
-				const command = data[response_command];
-				const raw_cart = data[change_cart];
-				const count_in_cart = raw_cart != cart_null ? raw_cart[cart_count] : 0;
-				const currency = data[global_currency];
-
-				if (command != del) {
-					const [validate, value] = get_validate_count(id, sign, command);
-
-					if (validate) {
-						let number = value;
-						const max = get_data_in_str(value, regexp_max) ? true : false;
-						if (max) { number = get_data_in_str(value, regexp_int)[0] }
-						else { }
-
-						set_count_on_listen(button, sign, number)
-
-						function set_count_on_listen(button, sign, value) {
-							const item = get_element(button, sign);
-							item.innerText = value;
-						}
-
-					} else { }
-					count_product = value;
+					if (new_value == 0) {
+						return [false, new_value]
+					}
+					if (sign != del) {
+						const value = sign == add ? +1 : -1;
+						const old_count = Number(get_data_in_str(list_products[id], regexp_int));
+						const count_in_bd = Number(get_data_in_str(new_value, regexp_int));
+						const valid_operation = old_count + value == count_in_bd;
+						return [valid_operation, new_value];
+					}
 				} else {
-					if (raw_cart != cart_null) { }
-					else {
-						const element = document.querySelector(".cart__wrapper");
-						element.innerHTML = data["None_cart"];
-					}
-					get_element(button).remove();
+					return [new_value == 1, new_value]
 				}
 
-				change_block(button, count_product);
-				final_set_data(raw_cart, count_in_cart);
-				set_currency(currency, true);
 			}
 
-			function response_false(data) {
-				console.log(data, 424)
+			function get_element(element, btn = false) {
+				const parent = element.closest(".cart__item");
+				const get_obj = selector => parent.querySelector(selector);
+				if (btn == sub || btn == add) { return get_obj(".cart__count").children[1] };
+				if (btn == "id") { return parent.dataset.id };
+				if (btn == "max") { return parent.dataset.max };
+				if (btn == del) { return get_obj(".cart__delete") };
+				if (!btn) { return parent };
 			}
 
-			function change_block(element, cnt, all = false) {
-				const cls = "non_enter";
-				const obj = get_element(element, "+");
-				const minus = obj.previousElementSibling;
-				const plus = obj.nextElementSibling;
-				const btn_del = get_element(element, del);
+			function final_set_data(cart, count) {
+				if (cart == "Null") { localStorage.removeItem(global_cart) }
+				else { set_localItem(cart, global_cart) };
+				change_cart_page(count);
 
-				if (all) {
-					disable(minus, true);
-					disable(plus, true)
-					disable(btn_del, true)
-				} else {
-					const block = get_data_in_str(cnt, regexp_max);
-					const count = Number(get_data_in_str(cnt, regexp_int)[0]);
-					if (count != 0) {
-						if (count > 1) { disable(minus, false) };
-						if (count == 1) { disable(minus, true) };
-					}
-					if (block) { disable(plus, true) };
-					if (!block) { disable(plus, false) };
-					if (btn_del) { disable(btn_del, false) };
-				}
+				function change_cart_page(count) {
+					const cart = document.querySelector(".header__item.icon-cart.cart");
+					const span = cart.firstElementChild;
 
-				function disable(element, add) {
-					if (add) {
-						element.classList.add(cls);
-						element.disabled = true;
-					}
-					else {
-						element.classList.remove(cls);
-						element.disabled = false;
+					if (count > 0) {
+						if (span) {
+							const value = Number(count)
+							span.innerText = value;
+						} else { cart.insertAdjacentHTML("afterbegin", `<span>${Number(1)}</span>`); }
+					} else {
+						if (span) { span.remove() }
 					}
 				}
 			}
 		}
+		//-----------------------------------------------------------------------------------------------------//
 
-		function get_validate_count(id, sign, new_value) {
-			const full_data_cart = get_localItem(global_cart);
-			if (full_data_cart) {
-				const list_products = full_data_cart[cart_products];
-				if (String(new_value) == String(list_products[id])) {
-					return [false, max_product]
-				}
-				if (new_value == 0) {
-					return [false, new_value]
-				}
-				if (sign != del) {
-					const value = sign == add ? +1 : -1;
-					const old_count = Number(get_data_in_str(list_products[id], regexp_int));
-					const count_in_bd = Number(get_data_in_str(new_value, regexp_int));
-					const valid_operation = old_count + value == count_in_bd;
-					return [valid_operation, new_value];
-				}
-			} else {
-				return [new_value == 1, new_value]
-			}
+	});
 
-		}
-
-		function get_element(element, btn = false) {
-			const parent = element.closest(".cart__item");
-			const get_obj = selector => parent.querySelector(selector);
-			if (btn == sub || btn == add) { return get_obj(".cart__count").children[1] };
-			if (btn == "id") { return parent.dataset.id };
-			if (btn == "max") { return parent.dataset.max };
-			if (btn == del) { return get_obj(".cart__delete") };
-			if (!btn) { return parent };
-		}
-
-		function final_set_data(cart, count) {
-			if (cart == "Null") { localStorage.removeItem(global_cart) }
-			else { set_localItem(cart, global_cart) };
-			change_cart_page(count);
-
-			function change_cart_page(count) {
-				const cart = document.querySelector(".header__item.icon-cart.cart");
-				const span = cart.firstElementChild;
-
-				if (count > 0) {
-					if (span) {
-						const value = Number(count)
-						span.innerText = value;
-					} else { cart.insertAdjacentHTML("afterbegin", `<span>${Number(1)}</span>`); }
-				} else {
-					if (span) { span.remove() }
-				}
-			}
-		}
-	}
-	//-----------------------------------------------------------------------------------------------------//
 
 	//---------------------------------------------sort_product--------------------------------------------//
 	function sort_product(method = false) {
@@ -1266,15 +1268,15 @@ window.onload = function () {
 	//-----------------------------------------------------------------------------------------------------//
 
 	//--------------------------------------------set_currency---------------------------------------------//
-	async function change_currency(value) {
+	function change_currency(value) {
 		set_currency(false, false, 0);
 		const url = get_global_url(global_currency);
 		const request = set_request(value);
 		const response = send_data_on_server(request, url);
-		await timeout(response, yes, no)
+		get_data_in_promise(response, yes, no);
 
 		function yes(data) { set_currency(data) }
-		function no(data) { }
+		function no(error) { }
 
 		function set_request(value) {
 			const request = { local: "True" }
@@ -1381,7 +1383,6 @@ window.onload = function () {
 					const new_price = number => Math.round(
 						row_price * valute_value * number * +`1e${count_round}`
 					) / +`1e${count_round}`;
-					console.log(valute_value, 777777777777777)
 					let final_value = currency == default_currency ? row_price : new_price(1);
 					if (vars == "*") { final_value = currency == default_currency ? number : new_price(get_value(element)) };
 					return set_price_for_product(get_element(element), final_value, sign)
@@ -1425,7 +1426,7 @@ window.onload = function () {
 	//-----------------------------------------------------------------------------------------------------//
 
 	//--------------------------------------------set_like--------------------------------------------------//
-	async function change_like(button, lst_product = false) {
+	function change_like(button, lst_product = false) {
 		const [cls_out, cls_in] = ["icon-like_m", "icon-like_n"];
 		const selector_object = lst_product ? "main-Object" : "main2__item";
 		const id_product = button.closest(`.${selector_object}`).dataset.like;
@@ -1438,7 +1439,7 @@ window.onload = function () {
 
 
 		const response = send_data_on_server(request, url);
-		get_data_in_promise(response, sucs_true, sucs_false);
+		get_data_in_promise(response, sucs_true, sucs_false, 300);
 
 
 		function sucs_true(data) {
@@ -1486,6 +1487,9 @@ window.onload = function () {
 			return element.classList.contains(cls_out)
 		}
 	}
+	//-------------------------------------------------------------------------------------------------------//
+
+
 	//-----------------------------------------------------------------------------------------------------//
 
 	//--------------------------------------------general--------------------------------------------------//
@@ -1735,15 +1739,14 @@ window.onload = function () {
 
 	//----------------------------------------send_and_receive_data_on_server-------------------------------//
 	async function send_data_on_server(obj, url = "/") {
-		const response = await fetch(url, {
+		return fetch(url, {
 			method: 'POST',
 			body: JSON.stringify(obj),
 			headers: {
 				'Content-Type': 'application/json',
 				'X-CSRFToken': getCookie('csrftoken'),
 			}
-		});
-		return response.json();
+		}).then(data => data.json()).catch(er => { throw er })
 
 		function getCookie(name) {
 			let cookieValue = null;
@@ -1761,22 +1764,18 @@ window.onload = function () {
 		}
 	}
 
-	async function timeout(response, func_true, func_false, delay = global_delay) {
-		setTimeout(() => { get_data_in_promise(response, func_true, func_false) }, delay)
-	}
-
-	async function get_data_in_promise(promise, success, error) {
-		promise.then(data => { return success(data) });
-		promise.catch(err => { return error(err) });
+	async function get_data_in_promise(promise, success, error, time = global_delay) {
+		try {
+			const [_, serverResponse] = await Promise.all([delay(time), promise]);
+			success(serverResponse);
+		} catch (er) { error(er) }
+		function delay(ms) {
+			return new Promise(resolve => setTimeout(resolve, ms));
+		}
 	}
 
 	function get_global_url(category) {
 		return `http://${window.location.host}/${category}/`
-	}
-
-	async function others_func_for_send_and_receive_data(request, url, func_true, func_false) {
-		const response = send_data_on_server(request, url);
-		await timeout(response, func_true, func_false);
 	}
 
 	function check_and_init_session() {

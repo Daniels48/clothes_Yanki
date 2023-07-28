@@ -13,7 +13,7 @@ def get_like_in_bd(request):
 
 
 def set_like(data, request):
-    like_local = [int(x) for x in data.get(LIKE_SESSION_ID)]
+    like_local = [int(x) for x in data.get(LIKE_SESSION_ID, [])]
     if like_local:
         like_bd = [int(x) for x in get_like_in_bd(request)]
         new_like_list = list(set([*like_bd, *like_local]))
