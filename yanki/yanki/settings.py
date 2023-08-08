@@ -11,17 +11,12 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 import os
 from pathlib import Path
-import re
 
 
-data = open(r'C:\Users\Daniels\Desktop\keys.txt', mode="r", encoding="UTF-8")
-string = data.read()
-data.close()
-
-key = re.findall(r"(?<=SECRET_KEY=\[)(.+)]", string)[0]
-email = re.findall(r"(?<=gmail_user=\[)(.+)]", string)[0]
-password = re.findall(r"(?<=gmail_password=\[)(.+)]", string)[0]
-other_email = re.findall(r"(?<=other_mail=\[)(.+)]", string)[0]
+key = os.getenv("SECRET_KEY")
+email = os.getenv("gmail_user")
+password = os.getenv("gmail_password")
+other_email = os.getenv("other_mail")
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.import clothes.middleware.set_local_data
