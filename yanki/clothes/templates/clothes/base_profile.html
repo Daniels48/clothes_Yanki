@@ -1,8 +1,8 @@
-{% extends 'clothes/otherlist.html' %}
+{% extends 'clothes/otherlist.html' %}{% load static i18n %}
 
 							{% block breadcrumbs %}
 							{{block.super}}
-								<a href="{% url 'history'%}" class="navigation__li">Личный кабинет
+								<a href="{% url 'history'%}" class="navigation__li">{% trans 'Личный кабинет' %}
 									<span class="navigation__row icon-row"></span>
 								</a>
 							{% endblock %}
@@ -13,13 +13,13 @@
 							<div class="lk__body">
 								<div class="lk__active">
 									<a href="{% url 'history' %}" class="lk__elem {% block history %} {% endblock history %}">
-										<div class="lk__history text-16">История заказов</div>
+										<div class="lk__history text-16">{% trans 'История заказов' %}</div>
 									</a>
 									<a href="{% url 'info' %}" class="lk__elem {% block persons %} {% endblock persons %}">
-										<div class="lk__person-info text-16">Личные данные</div>
+										<div class="lk__person-info text-16">{% trans 'Личные данные' %}</div>
 									</a>
 									<a href="{% url 'logout' %}" class="lk__elem">
-										<div class="lk__out text-16">Выйти</div>
+										<div class="lk__out text-16">{% trans 'Выйти' %}</div>
 									</a>
 								</div>
 								{% block profile %}

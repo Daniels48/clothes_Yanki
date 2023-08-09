@@ -1,7 +1,7 @@
-{% extends 'clothes/base.html' %}{% block content %}
+{% extends 'clothes/base.html' %}{% block content %}{% load static i18n %}
 		<div class="head-body">
 			<div class="container">
-				<div class="head-body__title title">Категории</div>
+				<div class="head-body__title title">{% trans 'Категории' %}</div>
 				<div class="head-body__category category">
 					<div class="category__wrapper">
 						<div class="category__box">{% for obj in object_list %}
@@ -17,13 +17,13 @@
 					<div class="head-body__news news">
 						<div class="container-news">
 							<div class="news__box">
-								<div class="news__title title">Узнайте первым о новинках</div>
+								<div class="news__title title">{% trans 'Узнайте первым о новинках' %}</div>
 								<form action="#" class="news__form" method="GET">
-									<input type="text" class="news__item news__input text-16" placeholder="Ваш e-mail *">
-									<button type="submit" class="news__item news__button text-16">Подписаться</button>
-									<p class="news__item news__text text-16">Нажимая на кнопку «Подписаться», я соглашаюсь на
+									<input type="text" class="news__item news__input text-16" placeholder="{% trans 'Ваш e-mail *' %}">
+									<button type="submit" class="news__item news__button text-16">{% trans 'Подписаться' %}</button>
+									<p class="news__item news__text text-16">{% trans 'Нажимая на кнопку «Подписаться», я соглашаюсь на
 										обработку моих персональных данных и ознакомлен(а) с условиями
-										конфиденциальности.</p>
+										конфиденциальности.' %}</p>
 								</form>
 							</div>
 						</div>

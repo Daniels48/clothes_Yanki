@@ -1,8 +1,8 @@
-{% extends 'clothes/otherlist.html' %}
+{% extends 'clothes/otherlist.html' %}{% load static i18n %}
 
 							{% block breadcrumbs %}
 							{{block.super}}
-								<a href="{% url 'favorite'%}" class="navigation__li">Избранное
+								<a href="{% url 'favorite'%}" class="navigation__li">{% trans 'Избранное' %}
 									<span class="navigation__row icon-row"></span>
 								</a>
 							{% endblock %}
@@ -10,7 +10,7 @@
 					{% block body %}
 					<div class="favorite">
 						<div class="favorite__wrapper">
-							<div class="favorite__title text-20">Избранное</div>
+							<div class="favorite__title text-20">{% trans 'Избранное' %}</div>
 							<div class="favorite__body main2__products">{% for obj in object_list %}
 								<div data-price="{{ obj.parent.price }}" data-like="{{obj.parent.id}}" class="main2__item">
 									<a href="{{ obj.parent.get_absolute_url }}" class="main2__img">

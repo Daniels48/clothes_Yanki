@@ -13,12 +13,6 @@ import os
 from pathlib import Path
 
 
-key = os.getenv("SECRET_KEY")
-email = os.getenv("gmail_user")
-password = os.getenv("gmail_password")
-other_email = os.getenv("other_mail")
-
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.import clothes.middleware.set_local_data
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -28,7 +22,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 
 
-SECRET_KEY = key
+SECRET_KEY = os.getenv("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -38,6 +32,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'modeltranslation',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -60,6 +55,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -165,12 +161,12 @@ EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = '587'
 EMAIL_USE_TLS = True
 
-EMAIL_HOST_USER = email
-EMAIL_HOST_PASSWORD = password
+EMAIL_HOST_USER = os.getenv("gmail_user")
+EMAIL_HOST_PASSWORD = os.getenv("gmail_password")
 
 EMAIL_SERVER = EMAIL_HOST_USER
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
-EMAIL_ADMIN = [other_email]
+EMAIL_ADMIN = [os.getenv("other_mail")]
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.1/topics/i18n/
@@ -200,4 +196,12 @@ MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 MEDIA_URL = "/media/"
 
 
+LOCALE_PATHS = (
+    os.path.join(BASE_DIR, 'locale'),
+)
 
+gettext = lambda s: s
+LANGUAGES = (
+    ("ru", gettext("Russia")),
+    ("en", gettext("English"))
+)

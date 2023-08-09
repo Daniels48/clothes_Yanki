@@ -1,4 +1,4 @@
-<!DOCTYPE html>{% load static %}{% load widget_tweaks %}
+<!DOCTYPE html>{% load static %}{% load widget_tweaks %}{% load static i18n %}
 <html lang="ru">
 
 <head>
@@ -34,10 +34,10 @@
 									<div class="burger__item five">
 									</div>
 									<div class="burger__item six">
-										<a href="#" class="burger__subitem text-18">Условия возврата</a>
+										<a href="#" class="burger__subitem text-18">{% trans "Условия возврата" %}</a>
 									</div>
 									<div class="burger__item seven">
-										<a href="#" class="text-20 burger__subitem">КОНТАКТЫ</a>
+										<a href="#" class="text-20 burger__subitem">{% trans "КОНТАКТЫ" %}</a>
 									</div>
 								</div>
 								<div class="burger__footer">
@@ -53,8 +53,8 @@
 					</div>
 					<div class="header__nav {% if not head_title %} _othercolor {% endif %}">
 						<a data-da="burger__item three,last,992,header__link,burger__subitem" href="/catalog/new/" class="header__link text-18">NEW</a>
-						<a data-da="burger__item four,last,992,header__link,burger__subitem" href="{% url 'catalog' %}" class="header__link text-18">КАТАЛОГ</a>
-						<a data-da="burger__item five,last,992,header__link,burger__subitem" href="{% url 'about' %}" class="header__link text-18">О НАС</a>
+						<a data-da="burger__item four,last,992,header__link,burger__subitem" href="{% url 'catalog' %}" class="header__link text-18">{% trans "КАТАЛОГ" %}</a>
+						<a data-da="burger__item five,last,992,header__link,burger__subitem" href="{% url 'about' %}" class="header__link text-18">{% trans "О НАС" %}</a>
 					</div>
 					<div class="header__title">
 						<a href="{% url 'home' %}" class="title icon-logo {% if not head_title %} _maincolor {% endif %}"></a>
@@ -89,13 +89,13 @@
 					</div>
 					<div class="header__lk lk {% if not head_title %} _maincolor {% endif %}">
 						<button class="header__item icon-search search_ico {% if not head_title %} _othercolor {% endif %}"></button>{% if request.user.is_authenticated %}
-						<a {% else %} <button {% endif %} data-da="burger__item two,last,767.9,header__item,burger__profile" {% if request.user.is_authenticated %} href="{% url 'history' %}" {% endif %} class="header__item profile">ЛИЧНЫЙ КАБИНЕТ<span class="icon-profile"></span>{% if request.user.is_authenticated %}</a> {% else %} </button>{% endif %}
+						<a {% else %} <button {% endif %} data-da="burger__item two,last,767.9,header__item,burger__profile" {% if request.user.is_authenticated %} href="{% url 'history' %}" {% endif %} class="header__item profile">{% trans "ЛИЧНЫЙ КАБИНЕТ" %}<span class="icon-profile"></span>{% if request.user.is_authenticated %}</a> {% else %} </button>{% endif %}
 						<a href="{% url 'favorite' %}" class="header__item icon-like_m favorite"></a>
 						<a href="{% url 'cart' %}" class="header__item icon-cart cart">{% if cart_count > 0 %}<span>{{ cart_count }}</span>{% endif %}</a>
 					</div>
 					<div data-da="burger__navigate,first,767.9,header__search,burger__search burger__form" class="header__search search">
 						<form action="/search/" class="search__form" name="search__form" autocomplete="off">
-							<input name="query" type="text" data-index="0" data-isenter=True class="search__input" placeholder="Введите ваш запрос">
+							<input name="query" type="text" data-index="0" data-isenter=True class="search__input" placeholder="{% trans 'Введите ваш запрос' %}">
 							<button type="submit" class="search__sbmt icon-search"></button>
 						</form>
 						<div class="header__subsearch unview">
@@ -109,8 +109,8 @@
 					</div>
 					{% if head_title %}
 					<div class="title-text">
-						<a href="/catalog/new/" class="title-text__head">Новая коллекция</a>
-						<a href="/catalog/new/" class="title-text__subtitle text-16">Cмотреть новинки<span class=" icon-rowa"></span></a>
+						<a href="/catalog/new/" class="title-text__head">{% trans "Новая коллекция" %}</a>
+						<a href="/catalog/new/" class="title-text__subtitle text-16">{% trans "Cмотреть новинки" %}<span class=" icon-rowa"></span></a>
 					</div>
 					{% endif %}
 				</header>
@@ -124,19 +124,19 @@
 				</div>
 				<div class="modals__wrapper">
 					<form action="#" data-type="0" method="POST" class="modals__form">{% csrf_token %}
-						<div class="modals__title text-20">Авторизация</div>
+						<div class="modals__title text-20">{% trans "Авторизация" %}</div>
 						<p class="modals__error text-16 error unview"></p>
 						<p class="modals__text text-16 unview"></p>
-						<input name="login" type="text" placeholder="Ваш e-mail*" class="modals__input text-16 modals__inpt modals__item">
+						<input name="login" type="text" placeholder="{% trans 'Ваш e-mail*' %}" class="modals__input text-16 modals__inpt modals__item">
 						<div class="modals__pass">
-							<input name="password" type="password" placeholder="Ваш пароль*" class="modals__input text-16  modals__psw modals__item">
+							<input name="password" type="password" placeholder="{% trans 'Ваш пароль*' %}" class="modals__input text-16  modals__psw modals__item">
 							<div class="modals__view"></div>
 						</div>
 						<div class="modals__ul">
-							<button type="button" data-type="1" class="modals__li text-16 pass">Забыли пароль</button>
-							<button type="button" data-type="2" class="modals__li text-16 reg">Нет аккаунта?</button>
+							<button type="button" data-type="1" class="modals__li text-16 pass">{% trans 'Забыли пароль' %}</button>
+							<button type="button" data-type="2" class="modals__li text-16 reg">{% trans 'Нет аккаунта?' %}</button>
 						</div>
-						<input type="submit" value="ВОЙТИ" class="modals__submit text-16 modals__input">
+						<input type="submit" value="{% trans 'ВОЙТИ' %}" class="modals__submit text-16 modals__input">
 					</form>
 				</div>
 			</div>
@@ -146,26 +146,26 @@
 				<div class="footer__box">
 					<div class="footer__item one">
 						<span class="footer_row icon-row"></span>
-						<div class="footer__title text-20">КОМПАНИЯ</div>
-						<a href="/about_info/" class="footer__subitem text-16">О нас</a>
-						<a href="#" class="footer__subitem text-16">Контакты</a>
+						<div class="footer__title text-20">{% trans 'КОМПАНИЯ' %}</div>
+						<a href="/about_info/" class="footer__subitem text-16">{% trans 'О нас' %}</a>
+						<a href="#" class="footer__subitem text-16">{% trans 'Контакты' %}</a>
 					</div>
 					<div class="footer__item two">
 						<span class="footer_row icon-row"></span>
-						<div class="footer__title text-20">ПОЛЕЗНОЕ</div>
-						<a href="#" class="footer__subitem text-16">Оплата и доставка</a>
-						<a href="#" class="footer__subitem text-16">Условия возврата</a>
-						<a href="#" class="footer__subitem text-16">Бонусная система</a>
+						<div class="footer__title text-20">{% trans 'ПОЛЕЗНОЕ' %}</div>
+						<a href="#" class="footer__subitem text-16">{% trans 'Оплата и доставка' %}</a>
+						<a href="#" class="footer__subitem text-16">{% trans 'Условия возврата' %}</a>
+						<a href="#" class="footer__subitem text-16">{% trans 'Бонусная система' %}</a>
 					</div>
 					<div class="footer__item three">
 						<span class="footer_row icon-row"></span>
-						<div class="footer__title text-20">ПОКУПАТЕЛЮ</div>
-						<a href="/favorite/" class="footer__subitem text-16">Избранное</a>
-						<a href="#" class="footer__subitem text-16">Публичная оферта</a>
-						<a href="#" class="footer__subitem text-16">Политика конфиденциальности</a>
+						<div class="footer__title text-20">{% trans 'ПОКУПАТЕЛЮ' %}</div>
+						<a href="/favorite/" class="footer__subitem text-16">{% trans 'Избранное' %}</a>
+						<a href="#" class="footer__subitem text-16">{% trans 'Публичная оферта' %}</a>
+						<a href="#" class="footer__subitem text-16">{% trans 'Политика конфиденциальности' %}</a>
 					</div>
 					<div class="footer__item four social">
-						<a href="#" class="social__title text-20">КОНТАКТЫ</a>
+						<a href="#" class="social__title text-20">{% trans 'КОНТАКТЫ' %}</a>
 						<div class="footer__subitem social__item one">
 							<a href="#" class="social__subitem icon-inst"></a>
 							<a href="#" class="social__subitem icon-tel"></a>
