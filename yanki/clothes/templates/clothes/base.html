@@ -63,12 +63,11 @@
 						<div class="header__box">
 						<div class="header__subbox lang change">
 							<button type='button' class="change__btn {% if not head_title %} _othercolor {% endif %}">
-								RU<span class="change__row icon-rowa"></span>
+								{{ language }}<span class="change__row icon-rowa"></span>
 							</button>
 							<div class="change__container">
 								<ul class='change__ul'>
-									<li class="change__li lang">UA</li>
-									<li class="change__li lang">EN</li>
+									<li class="change__li lang">{{ other_language }}</li>
 								</ul>
 							</div>
 							<form action="#" method="GET" name='form__lang' class="change__action">

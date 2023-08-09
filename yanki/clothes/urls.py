@@ -10,7 +10,6 @@ from .set_session_data.like import Like
 from .utilits.GlobalSearch import ClothesSearch
 from .views import *
 
-
 urlpatterns = [
                   path("", ClothesHome.as_view(), name="home"),
                   path("catalog/", ClothesCatalog.as_view(), name="catalog"),
@@ -27,11 +26,10 @@ urlpatterns = [
                   path("currency/", Currency.as_view(), name="authenticate"),
                   path("like/", Like.as_view(), name="like"),
                   path("about_info/", ClothesAbout.as_view(), name="about"),
-                path("cities/", get_cities, name="cities")
-
+                  path("language/", ClothesLanguages.as_view(), name="language"),
+                  path("cities/", get_cities, name="cities")
 
               ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-
 
 if settings.DEBUG:
     import debug_toolbar

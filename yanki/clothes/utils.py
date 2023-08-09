@@ -13,7 +13,11 @@ class GeneralDataMixin:
         currency = get_currency_for_page(self.request)
         context[CURRENCY_SESSION_ID] = currency
         context["sign"] = get_sign(currency)
+        list_language = ["RU", "EN"]
         context["currency_other"] = get_list_currency(currency)
+        language = self.request.session.get("language", "RU")
+        context["language"] = language
+        context["other_language"] = [x for x in list_language if x != language][0]
         cart = self.request.session.get(CART_SESSION_ID, [])
         context["cart_count"] = sum_products(cart)
         return context
@@ -37,12 +41,14 @@ def get_select_related_products():
 
 
 def get_list_category():
-    return Tag.objects.all().only("title", "slug").union(Catalog.objects.all().only("title", "slug"), all=True)
+    return Tag.objects.all().only("title", "slug", "title_en", "title_ru").\
+        union(Catalog.objects.all().only("title", "slug", "title_en", "title_ru"), all=True)
 
 
 def get_select_related_and_selected_fields_products(filters=False, types=False):
     select_related_products = get_select_related_products()
-    general_fields = ["parent__title", "parent__price", "parent__slug", "id", "parent__type__slug",
+    general_fields = ["parent__title", "parent__price", "parent__slug", "id", "parent__type__slug", "parent__title_en",
+                      "parent__title_ru",
                       "size__title", "color__hex"]
     list_fields = {"cart": ["image_1", "count"], "catalog": ["image", "parent__tags__title"]}
     general_fields.extend(list_fields.get(types))

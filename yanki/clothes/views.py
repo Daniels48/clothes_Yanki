@@ -1,8 +1,9 @@
 from django.http import HttpResponseNotFound, JsonResponse
+from django.views import View
 from django.views.generic import DetailView, ListView
 from clothes.models import *
 from .forms import Change_person_data
-from .others import decode_json
+from .others import decode_json, json_response
 from .set_session_data.cart import Cart
 from .set_session_data.like import get_favorite_products
 from .utils import GeneralMixin, get_catalog_products, get_list_category, get_product, get_list_for_product, FilterMixin
@@ -104,6 +105,15 @@ class ClothesFavorite(GeneralMixin, ListView):
 class ClothesAbout(GeneralMixin, ListView):
     model = Product
     template_name = "clothes/o_nas.html"
+
+
+class ClothesLanguages(View):
+    def post(self, request):
+        data = decode_json(request.body)
+        language = data.get("language")
+        request.session["language"] = language
+        dict_response = "Ok"
+        return json_response({"response": dict_response})
 
 
 def pageNotFound(request, exception):

@@ -7,6 +7,7 @@ window.onload = function () {
 	const global_currency = "currency";
 	const global_like = "like";
 	const global_delay = 1200;
+	const global_language = "language";
 
 	//-------------------------------------------keyupsearch-------------------------------------------------//
 	const head_search = document.querySelector(".search__input");
@@ -214,6 +215,8 @@ window.onload = function () {
 
 				if (get_contains_cls(change_lang_or_currency, "money")) {
 					change_currency(new_data);
+				} else {
+					change_language(old_data, new_data);
 				}
 
 			}
@@ -938,230 +941,227 @@ window.onload = function () {
 			}
 		}
 		//-----------------------------------------------------------------------------------------------------//
+	});
 
-		//--------------------------------------------------cart-------------------------------------------------//
-		function change_cart(button, sign, where_change = false) {
-			const [cart_products, cart_count, cart_null] = ["products", "count", "Null"];
-			const [change_cart, response_command] = ["change_cart", "command"];
-			const [regexp_int, regexp_max] = [/\d+/g, /\d+M/g];
-			const max_product = "Max";
-			const url = get_global_url(global_cart);
-			const bool = where_change ? "0" : "1";
-			const set_request = (id, sign) => { return { "id": id, "sign": sign, "get_currency": bool } };
-
-
-			if (where_change) {
-				const lst_cls = {
-					"nent": "_non_enter", "nsel": "non_select", "hld": "hold",
-					"ab": "animation_button", "lst": "last", "fz": "fsize"
-				};
-				const text_choose_size = document.querySelector(".info-product__choose-text");
-				const border_text = text_choose_size.parentNode;
-
-				if (text_choose_size.innerText == "Выберите размер") {
-					border_add_cls();
-					after_animation_border(false);
-				} else {
-					change_block_button(button, true);
-					const id = String(document.querySelector("[data-id]").dataset.id);
-					const request = set_request(id, sign);
-					const response = send_data_on_server(request, url);
-					get_data_in_promise(response, response_success, response_fail)
-
-					function response_success(data) {
-						const command = data[response_command];
-						const raw_cart = data[change_cart];
-						const count_in_cart = raw_cart[cart_count];
-						const [validate, value] = get_validate_count(id, sign, command);
-
-						if (!validate) {
-
-							if (value == 0) {
-							}
-
-							if (value == max_product) {
-								const last_size = document.querySelector(".last__size");
-								border_add_cls();
-								last_size.classList.add(lst_cls["lst"], lst_cls["fz"]);
-								after_animation_border(last_size)
-							}
-						}
-						change_block_button(button, false, raw_cart, count_in_cart);
-					}
-
-					function response_fail(data) {
-					}
-
-					function change_block_button(button, forward, raw_cart = false, count_in_cart = false) {
-						button.classList.add(lst_cls["hld"], lst_cls["ab"]);
-						button.disable = true;
-						if (!forward) {
-							button.classList.remove(lst_cls["hld"], lst_cls["ab"]);
-							button.addEventListener("transitionend", () => {
-								final_set_data(raw_cart, count_in_cart);
-								button.disabled = false;
-							});
-						}
-					}
-				}
-
-				function after_animation_border(max) {
-					const list_elem = max ? [border_text, max] : [border_text];
-					border_text.addEventListener("transitionend", () => {
-						list_elem.forEach(elem => elem.classList.remove(lst_cls["nsel"], lst_cls["fz"]))
-					});
-				}
-
-				function border_add_cls() {
-					border_text.classList.add(lst_cls["nent"], lst_cls["nsel"]);
-				}
+	//--------------------------------------------------cart-------------------------------------------------//
+	function change_cart(button, sign, where_change = false) {
+		const [cart_products, cart_count, cart_null] = ["products", "count", "Null"];
+		const [change_cart, response_command] = ["change_cart", "command"];
+		const [regexp_int, regexp_max] = [/\d+/g, /\d+M/g];
+		const max_product = "Max";
+		const url = get_global_url(global_cart);
+		const bool = where_change ? "0" : "1";
+		const set_request = (id, sign) => { return { "id": id, "sign": sign, "get_currency": bool } };
 
 
+		if (where_change) {
+			const lst_cls = {
+				"nent": "_non_enter", "nsel": "non_select", "hld": "hold",
+				"ab": "animation_button", "lst": "last", "fz": "fsize"
+			};
+			const text_choose_size = document.querySelector(".info-product__choose-text");
+			const border_text = text_choose_size.parentNode;
+
+			if (text_choose_size.innerText == "Выберите размер") {
+				border_add_cls();
+				after_animation_border(false);
 			} else {
-				change_block(button, 0, true);
-				const id = get_element(button, "id");
-				set_currency(false, false, id);
+				change_block_button(button, true);
+				const id = String(document.querySelector("[data-id]").dataset.id);
 				const request = set_request(id, sign);
-				let count_product = 0;
 				const response = send_data_on_server(request, url);
-				get_data_in_promise(response, response_true, response_false)
+				get_data_in_promise(response, response_success, response_fail)
 
-				function response_true(data) {
+				function response_success(data) {
 					const command = data[response_command];
 					const raw_cart = data[change_cart];
-					const count_in_cart = raw_cart != cart_null ? raw_cart[cart_count] : 0;
-					const currency = data[global_currency];
+					const count_in_cart = raw_cart[cart_count];
+					const [validate, value] = get_validate_count(id, sign, command);
 
-					if (command != del) {
-						const [validate, value] = get_validate_count(id, sign, command);
+					if (!validate) {
 
-						if (validate) {
-							let number = value;
-							const max = get_data_in_str(value, regexp_max) ? true : false;
-							if (max) { number = get_data_in_str(value, regexp_int)[0] }
-							else { }
-
-							set_count_on_listen(button, sign, number)
-
-							function set_count_on_listen(button, sign, value) {
-								const item = get_element(button, sign);
-								item.innerText = value;
-							}
-
-						} else { }
-						count_product = value;
-					} else {
-						if (raw_cart != cart_null) { }
-						else {
-							const element = document.querySelector(".cart__wrapper");
-							element.innerHTML = data["None_cart"];
+						if (value == 0) {
 						}
-						get_element(button).remove();
-					}
 
-					change_block(button, count_product);
-					final_set_data(raw_cart, count_in_cart);
-					set_currency(currency, true);
+						if (value == max_product) {
+							const last_size = document.querySelector(".last__size");
+							border_add_cls();
+							last_size.classList.add(lst_cls["lst"], lst_cls["fz"]);
+							after_animation_border(last_size)
+						}
+					}
+					change_block_button(button, false, raw_cart, count_in_cart);
 				}
 
-				function response_false(data) {
-
+				function response_fail(data) {
 				}
 
-				function change_block(element, cnt, all = false) {
-					const cls = "non_enter";
-					const obj = get_element(element, "+");
-					const minus = obj.previousElementSibling;
-					const plus = obj.nextElementSibling;
-					const btn_del = get_element(element, del);
-
-					if (all) {
-						disable(minus, true);
-						disable(plus, true)
-						disable(btn_del, true)
-					} else {
-						const block = get_data_in_str(cnt, regexp_max);
-						const count = Number(get_data_in_str(cnt, regexp_int)[0]);
-						if (count != 0) {
-							if (count > 1) { disable(minus, false) };
-							if (count == 1) { disable(minus, true) };
-						}
-						if (block) { disable(plus, true) };
-						if (!block) { disable(plus, false) };
-						if (btn_del) { disable(btn_del, false) };
-					}
-
-					function disable(element, add) {
-						if (add) {
-							element.classList.add(cls);
-							element.disabled = true;
-						}
-						else {
-							element.classList.remove(cls);
-							element.disabled = false;
-						}
+				function change_block_button(button, forward, raw_cart = false, count_in_cart = false) {
+					button.classList.add(lst_cls["hld"], lst_cls["ab"]);
+					button.disable = true;
+					if (!forward) {
+						button.classList.remove(lst_cls["hld"], lst_cls["ab"]);
+						button.addEventListener("transitionend", () => {
+							final_set_data(raw_cart, count_in_cart);
+							button.disabled = false;
+						});
 					}
 				}
 			}
 
-			function get_validate_count(id, sign, new_value) {
-				const full_data_cart = get_localItem(global_cart);
-				if (full_data_cart) {
-					const list_products = full_data_cart[cart_products];
-					if (String(new_value) == String(list_products[id])) {
-						return [false, max_product]
-					}
-					if (new_value == 0) {
-						return [false, new_value]
-					}
-					if (sign != del) {
-						const value = sign == add ? +1 : -1;
-						const old_count = Number(get_data_in_str(list_products[id], regexp_int));
-						const count_in_bd = Number(get_data_in_str(new_value, regexp_int));
-						const valid_operation = old_count + value == count_in_bd;
-						return [valid_operation, new_value];
-					}
+			function after_animation_border(max) {
+				const list_elem = max ? [border_text, max] : [border_text];
+				border_text.addEventListener("transitionend", () => {
+					list_elem.forEach(elem => elem.classList.remove(lst_cls["nsel"], lst_cls["fz"]))
+				});
+			}
+
+			function border_add_cls() {
+				border_text.classList.add(lst_cls["nent"], lst_cls["nsel"]);
+			}
+
+
+		} else {
+			change_block(button, 0, true);
+			const id = get_element(button, "id");
+			set_currency(false, false, id);
+			const request = set_request(id, sign);
+			let count_product = 0;
+			const response = send_data_on_server(request, url);
+			get_data_in_promise(response, response_true, response_false)
+
+			function response_true(data) {
+				const command = data[response_command];
+				const raw_cart = data[change_cart];
+				const count_in_cart = raw_cart != cart_null ? raw_cart[cart_count] : 0;
+				const currency = data[global_currency];
+
+				if (command != del) {
+					const [validate, value] = get_validate_count(id, sign, command);
+
+					if (validate) {
+						let number = value;
+						const max = get_data_in_str(value, regexp_max) ? true : false;
+						if (max) { number = get_data_in_str(value, regexp_int)[0] }
+						else { }
+
+						set_count_on_listen(button, sign, number)
+
+						function set_count_on_listen(button, sign, value) {
+							const item = get_element(button, sign);
+							item.innerText = value;
+						}
+
+					} else { }
+					count_product = value;
 				} else {
-					return [new_value == 1, new_value]
+					if (raw_cart != cart_null) { }
+					else {
+						const element = document.querySelector(".cart__wrapper");
+						element.innerHTML = data["None_cart"];
+					}
+					get_element(button).remove();
 				}
 
+				change_block(button, count_product);
+				final_set_data(raw_cart, count_in_cart);
+				set_currency(currency, true);
 			}
 
-			function get_element(element, btn = false) {
-				const parent = element.closest(".cart__item");
-				const get_obj = selector => parent.querySelector(selector);
-				if (btn == sub || btn == add) { return get_obj(".cart__count").children[1] };
-				if (btn == "id") { return parent.dataset.id };
-				if (btn == "max") { return parent.dataset.max };
-				if (btn == del) { return get_obj(".cart__delete") };
-				if (!btn) { return parent };
+			function response_false(data) {
+
 			}
 
-			function final_set_data(cart, count) {
-				if (cart == "Null") { localStorage.removeItem(global_cart) }
-				else { set_localItem(cart, global_cart) };
-				change_cart_page(count);
+			function change_block(element, cnt, all = false) {
+				const cls = "non_enter";
+				const obj = get_element(element, "+");
+				const minus = obj.previousElementSibling;
+				const plus = obj.nextElementSibling;
+				const btn_del = get_element(element, del);
 
-				function change_cart_page(count) {
-					const cart = document.querySelector(".header__item.icon-cart.cart");
-					const span = cart.firstElementChild;
+				if (all) {
+					disable(minus, true);
+					disable(plus, true)
+					disable(btn_del, true)
+				} else {
+					const block = get_data_in_str(cnt, regexp_max);
+					const count = Number(get_data_in_str(cnt, regexp_int)[0]);
+					if (count != 0) {
+						if (count > 1) { disable(minus, false) };
+						if (count == 1) { disable(minus, true) };
+					}
+					if (block) { disable(plus, true) };
+					if (!block) { disable(plus, false) };
+					if (btn_del) { disable(btn_del, false) };
+				}
 
-					if (count > 0) {
-						if (span) {
-							const value = Number(count)
-							span.innerText = value;
-						} else { cart.insertAdjacentHTML("afterbegin", `<span>${Number(1)}</span>`); }
-					} else {
-						if (span) { span.remove() }
+				function disable(element, add) {
+					if (add) {
+						element.classList.add(cls);
+						element.disabled = true;
+					}
+					else {
+						element.classList.remove(cls);
+						element.disabled = false;
 					}
 				}
 			}
 		}
-		//-----------------------------------------------------------------------------------------------------//
 
-	});
+		function get_validate_count(id, sign, new_value) {
+			const full_data_cart = get_localItem(global_cart);
+			if (full_data_cart) {
+				const list_products = full_data_cart[cart_products];
+				if (String(new_value) == String(list_products[id])) {
+					return [false, max_product]
+				}
+				if (new_value == 0) {
+					return [false, new_value]
+				}
+				if (sign != del) {
+					const value = sign == add ? +1 : -1;
+					const old_count = Number(get_data_in_str(list_products[id], regexp_int));
+					const count_in_bd = Number(get_data_in_str(new_value, regexp_int));
+					const valid_operation = old_count + value == count_in_bd;
+					return [valid_operation, new_value];
+				}
+			} else {
+				return [new_value == 1, new_value]
+			}
 
+		}
 
+		function get_element(element, btn = false) {
+			const parent = element.closest(".cart__item");
+			const get_obj = selector => parent.querySelector(selector);
+			if (btn == sub || btn == add) { return get_obj(".cart__count").children[1] };
+			if (btn == "id") { return parent.dataset.id };
+			if (btn == "max") { return parent.dataset.max };
+			if (btn == del) { return get_obj(".cart__delete") };
+			if (!btn) { return parent };
+		}
+
+		function final_set_data(cart, count) {
+			if (cart == "Null") { localStorage.removeItem(global_cart) }
+			else { set_localItem(cart, global_cart) };
+			change_cart_page(count);
+
+			function change_cart_page(count) {
+				const cart = document.querySelector(".header__item.icon-cart.cart");
+				const span = cart.firstElementChild;
+
+				if (count > 0) {
+					if (span) {
+						const value = Number(count)
+						span.innerText = value;
+					} else { cart.insertAdjacentHTML("afterbegin", `<span>${Number(1)}</span>`); }
+				} else {
+					if (span) { span.remove() }
+				}
+			}
+		}
+	}
+	//-----------------------------------------------------------------------------------------------------//
 	//---------------------------------------------sort_product--------------------------------------------//
 	function sort_product(method = false) {
 		const list_products = document.querySelectorAll('.main2__item');
@@ -1425,6 +1425,33 @@ window.onload = function () {
 	}
 	//-----------------------------------------------------------------------------------------------------//
 
+	//--------------------------------------------set_language--------------------------------------------------//
+
+	function change_language(old_data, new_data) {
+		const url = get_global_url(global_language);
+		const request = {};
+		request[global_language] = new_data;
+
+		const response = send_data_on_server(request, url);
+		get_data_in_promise(response, sucs_true, sucs_false, 300);
+
+
+		function sucs_true(data) {
+			const base_url = window.location.origin;
+			const value_enter = new_data.toLowerCase();
+			const path_url = window.location.pathname.replace(`/${old_data.toLowerCase()}/`, "");
+			set_localItem(value_enter, global_language);
+			console.log(path_url, 444)
+			const enter_url = `${base_url}/${value_enter}/` + path_url;
+			window.location.href = enter_url;
+		}
+
+		function sucs_false(data) {
+
+		}
+	}
+	//-----------------------------------------------------------------------------------------------------//
+
 	//--------------------------------------------set_like--------------------------------------------------//
 	function change_like(button, lst_product = false) {
 		const [cls_out, cls_in] = ["icon-like_m", "icon-like_n"];
@@ -1488,9 +1515,6 @@ window.onload = function () {
 		}
 	}
 	//-------------------------------------------------------------------------------------------------------//
-
-
-	//-----------------------------------------------------------------------------------------------------//
 
 	//--------------------------------------------general--------------------------------------------------//
 	function general() {
@@ -1928,7 +1952,6 @@ window.onload = function () {
 	}
 	//------------------------------------------------------------------------------------------------------//
 	//localStorage.clear();
-
 
 	performed_function();
 }

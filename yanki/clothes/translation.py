@@ -18,11 +18,6 @@ class TagTranslationOptions(TranslationOptions):
     fields = ("title", )
 
 
-@register(Size)
-class TagTranslationOptions(TranslationOptions):
-    fields = ("title",)
-
-
 @register(Color)
 class TagTranslationOptions(TranslationOptions):
     fields = ("title",)
