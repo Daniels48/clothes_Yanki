@@ -1,0 +1,16 @@
+services:
+  web-app:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./yanki: /yanki
+    command: python manage.py runserver 0.0.0.0:8000
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_PASSWORD: pass
+      POSTGRES_USER: pass
+      POSTGRES_DB: pass
+
+

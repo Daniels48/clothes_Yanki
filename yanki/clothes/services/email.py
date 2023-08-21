@@ -5,7 +5,7 @@ from yanki.settings import SITE_NAME
 
 
 def send_activate_email_message(email):
-    subject = f'Активация аккаунта на сайте {SITE_NAME}'
+    subject = f'Активация аккаунта на сайте {SITE_NAME}' # Заголовок
     cod = randint(1000, 9999)
     message = f"Ваш код подтверждения: {cod}"
     send_mail(subject, message, "Privet!", [email, ])

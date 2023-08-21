@@ -27,6 +27,7 @@ urlpatterns = [
                   path("like/", Like.as_view(), name="like"),
                   path("about_info/", ClothesAbout.as_view(), name="about"),
                   path("language/", ClothesLanguages.as_view(), name="language"),
+                  path("mail/", ClothesMail.as_view(), name="mail"),
                   path("cities/", get_cities, name="cities")
 
               ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

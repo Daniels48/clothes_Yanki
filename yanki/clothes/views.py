@@ -2,6 +2,7 @@ from django.http import HttpResponseNotFound, JsonResponse
 from django.views import View
 from django.views.generic import DetailView, ListView
 from clothes.models import *
+from users.models import *
 from .forms import Change_person_data
 from .others import decode_json, json_response
 from .set_session_data.cart import Cart
@@ -114,6 +115,25 @@ class ClothesLanguages(View):
         request.session["language"] = language
         dict_response = "Ok"
         return json_response({"response": dict_response})
+
+
+class ClothesMail(View):
+    def post(self, request):
+        data = decode_json(request.body)
+        email = data.get("email")
+        text = self.add_mail_mailing(email)
+        return json_response({"text": text})
+
+    @staticmethod
+    def add_mail_mailing(email):
+        span = f"<span class='news__span'>{email}</span>"
+        get_text = lambda text: f"Email «{span}»{text} добавлен в рассылку новостей!</div>"
+        if Mailing_news.objects.filter(email=email).exists():
+            return get_text(" уже")
+        else:
+            new_email = Mailing_news.objects.create(email=email)
+            new_email.save()
+            return get_text("")
 
 
 def pageNotFound(request, exception):

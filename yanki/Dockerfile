@@ -1,0 +1,13 @@
+FROM python:3.11
+
+WORKDIR "./yanki"
+
+ENV PYTHONUNBUFFERED 1
+ENV PYTHONDONTWRITEBYTECODE 1
+
+COPY . .
+
+RUN pip install -r r.txt
+
+EXPOSE 8000
+

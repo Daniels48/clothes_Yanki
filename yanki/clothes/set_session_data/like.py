@@ -83,3 +83,7 @@ def get_favorite_products(request):
     filters = {"parent__id__in": [*list_id]}
     list_products = get_select_related_and_selected_fields_products(filters, "catalog")
     return Set_data_products(list_products, request).products
+
+
+
+

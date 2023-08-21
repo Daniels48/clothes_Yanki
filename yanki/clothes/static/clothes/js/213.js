@@ -197,6 +197,59 @@ window.onload = function () {
 
 		const head_search = obj.closest(".search__input");
 
+		const mailing_news = obj.closest(".news__button");
+
+
+		const EMAIL_REGEXP = /^(([^<>()[\].,;:\s@"]+(\.[^<>()[\].,;:\s@"]+)*)|(".+"))@(([^<>()[\].,;:\s@"]+\.)+[^<>()[\].,;:\s@"]{2,})$/iu;
+		const isEmailValid = email => EMAIL_REGEXP.test(email);
+
+		if (mailing_news) {
+			add_email(mailing_news);
+		}
+
+		//-----------------------------------------------------------------------------------------------------//
+		function add_email(button) {
+			e.preventDefault();
+			const input = button.previousElementSibling.lastElementChild;
+			const input_value = input.value;
+			const news_container = document.querySelector(".container-news");
+			const mail_form = button.closest(".news__form");
+			const news_message = mail_form.querySelector(".news__message");
+			const load = news_container.querySelector(".load");
+			load.classList.add("wait");
+			console.log(load.classList.contains("wait"));
+			button.classList.add("block");
+
+
+			if (isEmailValid(input_value)) {
+				news_message.classList.add("unview");
+				const request = {};
+				request["email"] = input_value;
+				const url = get_global_url("mail");
+				const response = send_data_on_server(request, url);
+				get_data_in_promise(response, receive_data, error_receive);
+
+				function receive_data(data) {
+					const mail = data["text"];
+					button.classList.remove("block");
+					const news_email = document.querySelector(".news__email");
+					load.classList.remove("wait");
+					news_container.classList.add("email");
+					news_email.innerHTML = mail;
+				}
+
+				function error_receive(error) {
+					console.log(error)
+				}
+
+			} else {
+				news_message.classList.remove("unview");
+				button.classList.remove("block");
+				load.classList.remove("wait");
+			}
+
+		}
+
 		//-----------------------------------------------------------------------------------------------------//
 		const change_lang_or_currency = obj.closest('.change');
 		if (change_lang_or_currency) {
@@ -845,8 +898,6 @@ window.onload = function () {
 					}
 
 					if (method_local == "11" || method_local == "21") {
-						const EMAIL_REGEXP = /^(([^<>()[\].,;:\s@"]+(\.[^<>()[\].,;:\s@"]+)*)|(".+"))@(([^<>()[\].,;:\s@"]+\.)+[^<>()[\].,;:\s@"]{2,})$/iu;
-						const isEmailValid = email => EMAIL_REGEXP.test(email);
 						if (!isEmailValid(login.value)) {
 							set_error_data(text_error_email);
 							return false
@@ -1441,7 +1492,6 @@ window.onload = function () {
 			const value_enter = new_data.toLowerCase();
 			const path_url = window.location.pathname.replace(`/${old_data.toLowerCase()}/`, "");
 			set_localItem(value_enter, global_language);
-			console.log(path_url, 444)
 			const enter_url = `${base_url}/${value_enter}/` + path_url;
 			window.location.href = enter_url;
 		}
@@ -1450,6 +1500,11 @@ window.onload = function () {
 
 		}
 	}
+
+	function set_language() {
+
+	}
+
 	//-----------------------------------------------------------------------------------------------------//
 
 	//--------------------------------------------set_like--------------------------------------------------//
@@ -1893,7 +1948,6 @@ window.onload = function () {
 		})
 		return dict_filters;
 	}
-
 	//------------------------------------------------------------------------------------------------------//
 
 	//----------------------------------------localstorage--------------------------------------------------//

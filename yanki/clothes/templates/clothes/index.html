@@ -16,15 +16,33 @@
 
 					<div class="head-body__news news">
 						<div class="container-news">
-							<div class="news__box">
-								<div class="news__title title">{% trans 'Узнайте первым о новинках' %}</div>
-								<form action="#" class="news__form" method="GET">
-									<input type="text" class="news__item news__input text-16" placeholder="{% trans 'Ваш e-mail *' %}">
-									<button type="submit" class="news__item news__button text-16">{% trans 'Подписаться' %}</button>
-									<p class="news__item news__text text-16">{% trans 'Нажимая на кнопку «Подписаться», я соглашаюсь на
-										обработку моих персональных данных и ознакомлен(а) с условиями
-										конфиденциальности.' %}</p>
-								</form>
+							<div class="news__wrapper">
+								<div class="news__add">
+									<div class="news__email">Email «<span class="news__span"></span>» добавлен в рассылку новостей!</div>
+								</div>
+								<div class="news__box">
+									<div class="news__title title">{% trans 'Узнайте первым о новинках' %}</div>
+									<form action="#" class="news__form" method="POST">
+										<div class="news__containerInput news__margin">
+											<div class="news__message unview">Некорректный Email!</div>
+											<input type="text" class="news__item inner news__input text-16" placeholder="Ваш e-mail *">
+										</div>
+										<button type="submit" class="news__item news__margin news__button text-16">Подписаться</button>
+										<p class="news__item news__margin text-16 news_text">Нажимая на кнопку «Подписаться», я соглашаюсь на
+											обработку моих персональных данных и ознакомлен(а) с условиями
+											конфиденциальности.</p>
+									</form>
+								</div>
+								<div class="load">
+									<div class="load__body">
+										<div class="load__lds-ring">
+											<div></div>
+											<div></div>
+											<div></div>
+											<div></div>
+										</div>
+									</div>
+								</div>
 							</div>
 						</div>
 					</div>

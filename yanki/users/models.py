@@ -70,7 +70,7 @@ class CartProduct(models.Model):
     product = models.ForeignKey(Product, related_name="CartProducts", on_delete=models.CASCADE)
     user = models.ForeignKey(User, related_name="Cartuser", on_delete=models.CASCADE)
     count = models.PositiveIntegerField()
-#
-#
-# class Mailing_news(models.Model):
-#     email = models.EmailField(verbose_name="email address", blank=True, db_index=True)
+
+
+class Mailing_news(models.Model):
+    email = models.EmailField(verbose_name="email address", blank=True, db_index=True, unique=True)
