@@ -1,0 +1,295 @@
+{% extends 'clothes/otherlist.html' %}
+
+							{% block breadcrumbs %}
+							{{block.super}}
+								<a href="{% url 'catalog'  %}" class="navigation__li">Каталог
+									<span class="navigation__row icon-row"></span>
+								</a>
+								<a href="{% url  'category' object.parent.type.slug  %}" class="navigation__li">{{ object.parent.type.title }}
+									<span class="navigation__row icon-row"></span>
+								</a>
+								<a href="{{ object.get_absolute_url }}" class="navigation__li">{{ object.parent.title }}
+									<span class="navigation__row icon-row"></span>
+								</a>
+							{% endblock %}
+
+					{% block body %}
+					<div data-price="{{ object.parent.price }}"  data-like="{{object.parent.id}}" class="main-Object">
+						<div class="main-Object__box">
+							<div class="main-Object__body">{% for img in object.colors %}
+								<div data-hex="{{ img.color.hex }}" class="main-Object__gallery {% ifchanged %}_down{% endifchanged %}">
+									<div class="main-Object__imgs">
+										<div class="main-Object__img">
+											<img src="{{ img.image_1.url }}" alt="img">
+										</div>
+										<div class="main-Object__img">
+											<img src="{{ img.image_2.url }}" alt="img">
+										</div>
+										<div class="main-Object__img">
+											<img src="{{ img.image_3.url }}" alt="img">
+										</div>
+										<div class="main-Object__img">
+											<img src="{{ img.image_4.url }}" alt="img">
+										</div>
+										<div class="main-Object__img">
+											<img src="{{ img.image_5.url }}" alt="img">
+										</div>
+									</div>
+									<div class="main-Object__head-img">
+										<img src="{{ img.image.url }}" alt="img">
+									</div>
+								</div>{% endfor %}
+								<div class="main-Object__info info-product">
+									<div class="info-product__title text-20">{{ object.parent.title }}</div>
+									<div class="info-product__price text-16 _price">{{ object.f_price }}</div>
+									<div class="lds-roller">
+										<div></div>
+										<div></div>
+										<div></div>
+										<div></div>
+										<div></div>
+										<div></div>
+										<div></div>
+										<div></div>
+									</div>
+
+									<div class="info-product__colors-box">
+										<div class="info-product__colors">{% for clr in object.colors %}
+											<div data-hex="{{ clr.color.hex }}" class="info-product__color {% ifchanged %}_down{% endifchanged %}">
+												<div class="info-product__color-body" style="background: {{ clr.color.hex }}; {% if clr.color.hex == '#ffffff' %}border: 1px solid #252525;{% endif %}"></div>
+											</div>{% endfor %}
+										</div>
+										<div class="info-product__color-text">
+											<div class="info-product__color-text-sub">Цвет: </div>{% for clr in object.colors %}
+											<div data-hex="{{ clr.color.hex }}" class="info-product__color-text-head {% ifchanged %}_down{% endifchanged %}">{{ clr.color.title }}</div>{% endfor %}
+										</div>
+									</div>
+
+									<div class="info-product__choose-box">
+										<div class="info-product__choose-inner">
+											<div class="info-product__choose-text text-16">Выберите размер</div>
+											<div class="info-product__choose-row icon-row"></div>
+										</div>
+										<div class="info-product__choose-list list-size">{% for hex, list in object.sizes.items %}
+											<div data-hex="{{ hex }}" class="list-size__wrapper">
+												<div class="list-size__body">{% for obj in list %}
+													<div data-max="{{ obj.count }}" data-id="{{obj.id}}" class="list-size__item">
+														<div class="list-size__btn">
+															<div class="list-size__circle"></div>
+														</div>
+														<div class="list-size__size">{{ obj.size.title }}</div>
+													</div>{% endfor %}
+												</div>
+											</div>{% endfor %}
+										</div>
+										<div class="last__size text-14 unview">Крайний размер у вас в корзине</div>
+									</div>
+									<div class="info-product__buttons-box">
+										<div class="info-product__button-cart text-16 btn-product">
+											<span>В КОРЗИНУ</span>
+											<div class="lds-facebook">
+												<div></div>
+												<div></div>
+												<div></div>
+											</div>
+										</div>
+										<div class="info-product__button-love">
+											<div class="info-product__button-love-container">
+												<div class="info-product__icon-love {% if object.like %} icon-like_n {% else %} icon-like_m {% endif %}"></div>
+												<div class="info-product__button-love-text text-14">{% if object.like %}В ИЗБРАННОМ{% else %}В ИЗБРАННОЕ{% endif %} </div>
+											</div>
+										</div>
+									</div>
+									<div class="info-product__details">
+										<div class="info-product__details-title text-16">Подробности</div>
+										<div class="info-product__details-item">
+											<div class="info-product__details-item-box">
+												<div class="info-product__item-text text-16">Обмеры и описание</div>
+												<div class="info-product__details-row icon-row"></div>
+											</div>
+											<div class="info-product__details-item-info" style="font-weight: 200;"><br>{{object.parent.info}}</div>
+										</div>
+										<div class="info-product__details-item">
+											<div class="info-product__details-item-box">
+												<div class="info-product__details-text text-16">Состав и уход</div>
+												<div class="info-product__details-row icon-row"></div>
+											</div>
+											<div class="info-product__details-item-info">
+												<div class="info-product__details-item-inner">
+													{% if object.composition %} {% autoescape off %} {{object.composition}} {% endautoescape %} {% endif%}
+												</div>
+												<div class="info-product__details-item-inner">
+													{% if object.care %} {% autoescape off %} {{object.care}} {% endautoescape %}{% endif%}
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="main-Other">
+								<div class="main-Other__body">
+									<div class="main-Other__all">
+										<div class="main-Other__title text-20">
+											Весь образ
+										</div>
+										<div class="main-Other__box main2__products">{% for obj in list %}
+											<div data-price="{{ obj.parent.price }}" class="main2__item">
+											<a href="{{ obj.parent.get_absolute_url }}" class="main2__img">
+												<img src="{{ obj.image.url }}" alt="img">
+												<span class="icon-like_m"></span>
+											</a>
+											<div class="main2__content-text">
+												<a href="{{ obj.parent.get_absolute_url }}" class="main2__title text-16">{{ obj.parent.title }}</a>
+												<div class="main2__price text-16 _price">{{ obj.f_price }}</div>
+												<div class="lds-roller">
+													<div></div>
+													<div></div>
+													<div></div>
+													<div></div>
+													<div></div>
+													<div></div>
+													<div></div>
+													<div></div>
+												</div>
+												<div class="main2__size size">
+													<ul class="size__list">{% for size in obj.size.title %}
+														<li class="size__li text-16">{{ size }}</li>{% endfor %}
+													</ul>
+												</div>
+												<div class="main2__color color">
+													<ul class="color__list">{% for color in obj.color.hex %}
+															<li class="color__li" style="background: {{ color }}; {% if color == '#ffffff' %}border: 1px solid #252525;{% endif %}"></li>{% endfor %}
+													</ul>
+												</div>
+												<div class="main2__span">{% if obj.parent.tags.all %} {% for t in obj.parent.tags.all %}
+													<span class="text-16">{{ t.title }}</span> {% endfor %} {% endif %}
+												</div>
+											</div>
+										</div>{% endfor %}
+										</div>
+									</div>
+									<div class="main-Other__dop">
+										<div class="main-Other__title text-20">
+											Дополните образ
+										</div>
+										<div class="main-Other__box main2__products">{% for obj in list %}
+											<div data-price="{{ obj.parent.price }}" class="main2__item">
+											<a href="{{ obj.parent.get_absolute_url }}" class="main2__img">
+												<img src="{{ obj.image.url }}" alt="img">
+												<span class="icon-like_m"></span>
+											</a>
+											<div class="main2__content-text">
+												<a href="{{ obj.parent.get_absolute_url }}" class="main2__title text-16">{{ obj.parent.title }}</a>
+												<div class="main2__price text-16 _price">{{ obj.f_price }}</div>
+												<div class="lds-roller">
+													<div></div>
+													<div></div>
+													<div></div>
+													<div></div>
+													<div></div>
+													<div></div>
+													<div></div>
+													<div></div>
+												</div>
+												<div class="main2__size size">
+													<ul class="size__list">{% for size in obj.size.title %}
+														<li class="size__li text-16">{{ size }}</li>{% endfor %}
+													</ul>
+												</div>
+												<div class="main2__color color">
+													<ul class="color__list">{% for color in obj.color.hex %}
+															<li class="color__li" style="background: {{ color }}; {% if color == '#ffffff' %}border: 1px solid #252525;{% endif %}"></li>{% endfor %}
+													</ul>
+												</div>
+												<div class="main2__span">{% if obj.parent.tags.all %} {% for t in obj.parent.tags.all %}
+													<span class="text-16">{{ t.title }}</span> {% endfor %} {% endif %}
+												</div>
+											</div>
+										</div>{% endfor %}
+										</div>
+									</div>
+									<div class="main-Other__like">
+										<div class="main-Other__title text-20">
+											Вам может понравиться
+										</div>
+										<div class="main-Other__box main2__products">{% for obj in list %}
+											<div data-price="{{ obj.parent.price }}" class="main2__item">
+											<a href="{{ obj.parent.get_absolute_url }}" class="main2__img">
+												<img src="{{ obj.image.url }}" alt="img">
+												<span class="icon-like_m"></span>
+											</a>
+											<div class="main2__content-text">
+												<a href="{{ obj.parent.get_absolute_url }}" class="main2__title text-16">{{ obj.parent.title }}</a>
+												<div class="main2__price text-16 _price">{{ obj.f_price }}</div>
+												<div class="lds-roller">
+													<div></div>
+													<div></div>
+													<div></div>
+													<div></div>
+													<div></div>
+													<div></div>
+													<div></div>
+													<div></div>
+												</div>
+												<div class="main2__size size">
+													<ul class="size__list">{% for size in obj.size.title %}
+														<li class="size__li text-16">{{ size }}</li>{% endfor %}
+													</ul>
+												</div>
+												<div class="main2__color color">
+													<ul class="color__list">{% for color in obj.color.hex %}
+															<li class="color__li" style="background: {{ color }}; {% if color == '#ffffff' %}border: 1px solid #252525;{% endif %}"></li>{% endfor %}
+													</ul>
+												</div>
+												<div class="main2__span">{% if obj.parent.tags.all %} {% for t in obj.parent.tags.all %}
+													<span class="text-16">{{ t.title }}</span> {% endfor %} {% endif %}
+												</div>
+											</div>
+										</div>{% endfor %}
+										</div>
+									</div>
+									<div class="main-Other__lastView">
+										<div class="main-Other__title text-20">
+											Весь образ
+										</div>
+										<div class="main-Other__box main2__products">{% for obj in list %}
+											<div data-price="{{ obj.parent.price }}" class="main2__item">
+											<a href="{{ obj.parent.get_absolute_url }}" class="main2__img">
+												<img src="{{ obj.image.url }}" alt="img">
+												<span class="icon-like_m"></span>
+											</a>
+											<div class="main2__content-text">
+												<a href="{{ obj.parent.get_absolute_url }}" class="main2__title text-16">{{ obj.parent.title }}</a>
+												<div class="main2__price text-16 _price">{{ obj.f_price }}</div>
+												<div class="lds-roller">
+													<div></div>
+													<div></div>
+													<div></div>
+													<div></div>
+													<div></div>
+													<div></div>
+													<div></div>
+													<div></div>
+												</div>
+												<div class="main2__size size">
+													<ul class="size__list">{% for size in obj.size.title %}
+														<li class="size__li text-16">{{ size }}</li>{% endfor %}
+													</ul>
+												</div>
+												<div class="main2__color color">
+													<ul class="color__list">{% for color in obj.color.hex %}
+															<li class="color__li" style="background: {{ color }}; {% if color == '#ffffff' %}border: 1px solid #252525;{% endif %}"></li>{% endfor %}
+													</ul>
+												</div>
+												<div class="main2__span">{% if obj.parent.tags.all %} {% for t in obj.parent.tags.all %}
+													<span class="text-16">{{ t.title }}</span> {% endfor %} {% endif %}
+												</div>
+											</div>
+										</div>{% endfor %}
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					{% endblock body %}

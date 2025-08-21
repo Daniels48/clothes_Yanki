@@ -1,0 +1,35 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:15
+    container_name: yanki_db
+    restart: always
+    environment:
+      POSTGRES_USER: ${DbUser}
+      POSTGRES_PASSWORD: ${DBPassword}
+      POSTGRES_DB: ${DBName}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./dump.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "${DBPort}:5432"
+
+  web:
+    build: .
+    container_name: yanki_web
+    restart: always
+    command: sh -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+    volumes:
+      - .:/app
+      - ./media:/app/media
+
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    environment:
+      RUNNING_IN_DOCKER: "1"
+
+volumes:
+  postgres_data:

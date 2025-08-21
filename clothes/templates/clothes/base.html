@@ -1,0 +1,172 @@
+<!DOCTYPE html>{% load static %}{% load widget_tweaks %}
+<html lang="ru">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+	<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="cache-control" content="max-age=0" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+	<title>{{ title }}</title>
+	<link rel="stylesheet" href="{% static 'clothes/css/381.css' %}">
+	<link rel="shortcut icon" href="{% static 'clothes/icons/icons.svg' %}" type="image/x-icon" />
+</head>
+
+<body>
+	<div class="wrapper">{% if head_title %}
+		<div class="head-container">{% endif %}
+			<div class="container">
+				<header class="header">
+					<div class="header__burger burger">
+						<div class="burger__icon {% if not head_title %} _maincolor {% endif %}"><span></span></div>
+						<nav class="burger__menu {% if not head_title %} _maincolor2 {% endif %}">
+							<div class="burger__menu-wrapper">
+								<div class="burger__item one">
+								</div>
+								<div class="burger__item two">
+								</div>
+								<div class="burger__item three">
+								</div>
+								<div class="burger__item four">
+								</div>
+								<div class="burger__item five">
+								</div>
+								<div class="burger__item six">
+								</div>
+								<div class="burger__item seven">
+								</div>
+								<div class="burger__footer">
+									<div class="burger__footer-item">
+									</div>
+								</div>
+							</div>
+						</nav>
+					</div>
+					<div class="header__nav {% if not head_title %} _othercolor {% endif %}">
+						<a data-da="burger__item three,last,992,header__link,burger__subitem" href="/catalog/new/" class="header__link text-18">NEW</a>
+						<a data-da="burger__item four,last,992,header__link,burger__subitem" href="{% url 'catalog' %}" class="header__link text-18">КАТАЛОГ</a>
+						<a data-da="burger__item five,last,992,header__link,burger__subitem" href="#" class="header__link text-18">О НАС</a>
+					</div>
+					<div class="header__title">
+						<a href="{% url 'home' %}" class="title icon-logo {% if not head_title %} _maincolor {% endif %}"></a>
+					</div>
+					<div class="header__change">
+						<div class="header__box">
+						<div class="header__subbox lang change">
+							<button type='button' class="change__btn {% if not head_title %} _othercolor {% endif %}">
+								RU<span class="change__row icon-rowa"></span>
+							</button>
+							<div class="change__container">
+								<ul class='change__ul'>
+									<li class="change__li lang">UA</li>
+									<li class="change__li lang">EN</li>
+								</ul>
+							</div>
+							<form action="#" method="GET" name='form__lang' class="change__action">
+								<input type="text" class="change__input unview" name='lang' value="ru">
+							</form>
+						</div>
+						<div data-da="burger__item one,last,767.9,header__subbox,burger__form" class="header__subbox money change">
+							<button type='button' class="change__btn {% if not head_title %} _othercolor {% endif %}">{{ currency }}
+								<span class="change__row icon-rowa"></span>
+							</button>
+							<div class="change__container">
+								<ul class="change__ul">{% for item in currency_other %}
+									<li class="change__li currency">{{ item }}</li>{% endfor %}
+								</ul>
+							</div>
+						</div>
+					</div>
+					</div>
+					<div class="header__lk lk {% if not head_title %} _maincolor {% endif %}">
+						<button class="header__item icon-search search_ico {% if not head_title %} _othercolor {% endif %}"></button>{% if request.user.is_authenticated %}
+						<a {% else %} <button {% endif %} data-da="burger__item two,last,767.9,header__item,burger__profile" {% if request.user.is_authenticated %} href="{% url 'history' %}" {% endif %} class="header__item profile">ЛИЧНЫЙ КАБИНЕТ<span class="icon-profile"></span>{% if request.user.is_authenticated %}</a> {% else %} </button>{% endif %}
+						<a href="{% url 'favorite' %}" class="header__item icon-like_m favorite"></a>
+						<a href="{% url 'cart' %}" class="header__item icon-cart cart">{% if cart_count > 0 %}<span>{{ cart_count }}</span>{% endif %}</a>
+					</div>
+					<div data-da="burger__item one,first,767.9,header__search,burger__search burger__form" class="header__search search">
+						<form action="#" class="search__form" name="search__form">
+							<input name="search" type="text" value="" class="search__input" placeholder="Введите ваш запрос">
+							<button type="submit" class="search__sbmt icon-search"></button>
+						</form>
+					</div>
+					{% if head_title %}
+					<div class="title-text">
+						<a href="/catalog/new/" class="title-text__head">Новая коллекция</a>
+						<a href="/catalog/new/" class="title-text__subtitle text-16">Cмотреть новинки<span class=" icon-rowa"></span></a>
+					</div>
+					{% endif %}
+				</header>
+			</div>{% if head_title %}
+		</div>{% endif %}
+		{% block content %}{% endblock %}{% if not request.user.is_authenticated %}
+		<div class="modals">
+			<div class="modals__body">
+				<div class="modals__exit-wrapper">
+					<div class="modals__exit"></div>
+				</div>
+				<div class="modals__wrapper">
+					<form action="#" data-type="0" method="POST" class="modals__form">{% csrf_token %}
+						<div class="modals__title text-20">Авторизация</div>
+						<p class="modals__error text-16 error unview"></p>
+						<p class="modals__text text-16 unview"></p>
+						<input name="login" type="text" placeholder="Ваш e-mail*" class="modals__input text-16 modals__inpt modals__item">
+						<div class="modals__pass">
+							<input name="password" type="password" placeholder="Ваш пароль*" class="modals__input text-16  modals__psw modals__item">
+							<div class="modals__view"></div>
+						</div>
+						<div class="modals__ul">
+							<button type="button" data-type="1" class="modals__li text-16 pass">Забыли пароль</button>
+							<button type="button" data-type="2" class="modals__li text-16 reg">Нет аккаунта?</button>
+						</div>
+						<input type="submit" value="ВОЙТИ" class="modals__submit text-16 modals__input">
+					</form>
+				</div>
+			</div>
+		</div>{% endif %}
+		<footer class="footer">
+			<div class="container footerc">
+				<div class="footer__box">
+					<div class="footer__item one">
+						<span class="footer_row icon-row"></span>
+						<div class="footer__title text-20">КОМПАНИЯ</div>
+						<a href="#" class="footer__subitem text-16">О нас</a>
+						<a href="#" class="footer__subitem text-16">Контакты</a>
+					</div>
+					<div class="footer__item two">
+						<span class="footer_row icon-row"></span>
+						<div class="footer__title text-20">ПОЛЕЗНОЕ</div>
+						<a href="#" class="footer__subitem text-16">Оплата и доставка</a>
+						<a data-da="burger__item six,last,767.9,footer__subitem,burger__subitem,burger__icon,_burger" href="#" class="footer__subitem text-16">Условия возврата</a>
+						<a href="#" class="footer__subitem text-16">Бонусная система</a>
+					</div>
+					<div class="footer__item three">
+						<span class="footer_row icon-row"></span>
+						<div class="footer__title text-20">ПОКУПАТЕЛЮ</div>
+						<a href="#" class="footer__subitem text-16">Избранное</a>
+						<a href="#" class="footer__subitem text-16">Публичная оферта</a>
+						<a href="#" class="footer__subitem text-16">Политика конфиденциальности</a>
+					</div>
+					<div class="footer__item four social">
+						<a data-da="burger__item seven,last,767.9,social__title,burger__subitem,burger__icon,_burger" href="#" class="social__title text-20">КОНТАКТЫ</a>
+						<div class="footer__subitem social__item one">
+							<a data-da="burger__footer-item,first,767.9,,burger__footer-subitem,burger__icon,_burger" href="#" class="social__subitem icon-inst"></a>
+							<a data-da="burger__footer-item,last,767.9,,burger__footer-subitem,burger__icon,_burger" href="#" class="social__subitem icon-tel"></a>
+						</div>
+						<a data-da="burger__footer,1,767.9,,burger__footer-item,burger__icon,_burger" href='tel:380730963644' class="social__item footer__subitem text-16">+38(073) 096 36 44</a>
+						<a data-da="burger__footer,last,767.9,,burger__footer-item,burger__icon,_burger" href="mailto:info@yanki.com" class="social__item footer__subitem text-16">info@yanki.com</a>
+					</div>
+				</div>
+				<p class="footer__copy-right">©️ 2021 Yanki. All rights reserved</p>
+			</div>
+		</footer>
+	</div>
+
+	<script src="{% static 'clothes/js/jquery-3.6.2.min.js' %}" type="text/javascript"></script>
+	<script src="{% static 'clothes/js/slick.min.js' %}" type="text/javascript"></script>
+	<script src="{% static 'clothes/js/nouislider.min.js' %}" type="text/javascript"></script>
+	<script src="{% static 'clothes/js/888.js' %}" type="text/javascript"></script>
+</body>
+
+</html>

@@ -1,0 +1,32 @@
+{% extends 'clothes/base.html' %}{% block content %}
+		<div class="head-body">
+			<div class="container">
+				<div class="head-body__title title">Категории</div>
+				<div class="head-body__category category">
+					<div class="category__wrapper">
+						<div class="category__box">{% for obj in object_list %}
+							<div class="category__item">
+								<a href="{{ obj.get_absolute_url }}" class="category__a">
+									<img src="{{ obj.image.url }}" alt="image" class="category__img">
+									<div class="category__subtitle text-20">{{obj.title}}</div>
+								</a>
+							</div>{% endfor %}
+						</div>
+					</div>
+					<div class="head-body__news news">
+						<div class="container-news">
+							<div class="news__box">
+								<div class="news__title title">Узнайте первым о новинках</div>
+								<form action="#" class="news__form" method="GET">
+									<input type="text" class="news__item news__input text-16" placeholder="Ваш e-mail *">
+									<button type="submit" class="news__item news__button text-16">Подписаться</button>
+									<p class="news__item news__text text-16">Нажимая на кнопку «Подписаться», я соглашаюсь на
+										обработку моих персональных данных и ознакомлен(а) с условиями
+										конфиденциальности.</p>
+								</form>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>{% endblock %}

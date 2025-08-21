@@ -1,0 +1,39 @@
+{% extends 'clothes/base_profile.html' %}
+{% block persons %} _select {% endblock persons %}
+					{% block profile %}
+								<div class="person-info">
+									<form action="$" class="person-info__form" method="POST">
+										<div class="person-info__item">
+											<div class="person-info__title text-16">Персональные данные:</div>
+											<div class="person-info__body">
+												<div class="person-info__subitem firstname">
+													<input class="text-16 info" name="firstname" type="text" disabled value="{{ request.user.username }}">
+												</div>
+												<div class="person-info__subitem lastname">
+													<input class="text-16 info" name="lastname" type="text" disabled value="Станиславчук">
+												</div>
+												<div class="person-info__subitem mail">
+													<input class="text-16 info" name="mail" type="text" disabled value="{{ request.user.email }}">
+												</div>
+												<div class="person-info__subitem phone">
+													<input class="text-16 info" name="phone" type="text" disabled value="+38(067)470 20 66">
+												</div>
+											</div>
+										</div>
+										<div class="person-info__item">
+											<div class="person-info__title text-16">Адрес доставки:</div>
+											<div class="person-info__body">
+												<div class="person-info__subitem address">
+													<input class="text-16 info" name="address" type="text" disabled value="Черновцы">
+												</div>
+												<div class="person-info__subitem home">
+													<input class="text-16 info" name="home" type="text" disabled value="№4">
+												</div>
+											</div>
+										</div>
+										<div class="person-info__button">
+											<input class="text-16" type="submit" value="ИЗМЕНИТЬ ИНФОРМАЦИЮ">
+										</div>
+									</form>
+								</div>
+					{% endblock profile %}
