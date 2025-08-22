@@ -34,12 +34,30 @@ cp ./.env.example ./.env
 Cоберите и запустите контейнеры: 
 
 ```bash
-docker-compose up -d --build. 
+docker-compose up -d --build 
 ```
 
 Сайт будет доступен по адресу http://localhost:8000/.
 
 ### Запуск через `runserver`
+
+Создаём виртуальное окружение (если ещё не создано)
+
+```bash
+python -m venv venv
+```
+
+Активируем виртуальное окружение в Windows 
+
+```bash
+.\venv\Scripts\Activate
+```
+
+в Linux / macOS
+
+```bash
+source venv/bin/activate
+```
 
 Установите зависимости: 
 
