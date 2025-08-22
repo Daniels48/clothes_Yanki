@@ -12,12 +12,18 @@
 - PostgreSQL 15  
 - Docker и Docker Compose (если планируется запуск в контейнерах)  
 
-## Установка и запуск
+## Установка
 Сначала склонируйте репозиторий:
 
 ```bash
 git clone https://github.com/Daniels48/clothes_Yanki.git
 ```
+
+## Запуск
+
+Проект можно запуститить через Dokcer или через `runserver`.
+
+### Запуск через Docker
 
 Скопируйте `.env.example` в тот же каталог с именем `.env` и заполните свои данные:
 
@@ -25,7 +31,7 @@ git clone https://github.com/Daniels48/clothes_Yanki.git
 cp ./.env.example ./.env
 ```
 
-Для запуска через Docker соберите и запустите контейнеры: 
+Cоберите и запустите контейнеры: 
 
 ```bash
 docker-compose up -d --build. 
@@ -33,22 +39,20 @@ docker-compose up -d --build.
 
 Сайт будет доступен по адресу http://localhost:8000/.
 
+### Запуск через `runserver`
 
-Для локального запуска через runserver установите зависимости: 
+Установите зависимости: 
 
 ```bash
 pip install -r requirements.txt 
 ```
 
 
-Используется локальная база SQLite (db.sqlite3). 
-Если нужно, создайте миграции: 
-
+Запустите сервер разработки: 
 
 ```bash
-python manage.py migrate. 
+python manage.py runserver
 ```
 
-Запустите сервер разработки: python manage.py runserver. 
 
 Сайт будет доступен по адресу http://127.0.0.1:8000/.
