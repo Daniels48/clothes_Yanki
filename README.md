@@ -21,7 +21,7 @@ git clone https://github.com/Daniels48/clothes_Yanki.git
 
 ## Запуск
 
-Проект можно запуститить через Dokcer или через `runserver`.
+Проект можно запуститить через Docker или через `runserver`.
 
 ### Запуск через Docker
 
