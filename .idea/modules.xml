@@ -2,11 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-<<<<<<< HEAD
-      <module fileurl="file://$PROJECT_DIR$/.idea/Yanki django.iml" filepath="$PROJECT_DIR$/.idea/Yanki django.iml" />
-=======
       <module fileurl="file://$PROJECT_DIR$/.idea/yanki_django_copy.iml" filepath="$PROJECT_DIR$/.idea/yanki_django_copy.iml" />
->>>>>>> 88267f1 (Reload project for Docker!)
     </modules>
   </component>
 </project>
