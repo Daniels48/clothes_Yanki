@@ -820,12 +820,12 @@ INSERT INTO public.clothes_baseproduct_tags VALUES (7, 5, 3);
 -- Data for Name: clothes_catalog; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-INSERT INTO public.clothes_catalog VALUES (1, 'Верхняя одежда', 'verhnyaya-odezhda', 'image/catalog/4_IX0WqDI.jpg', 'Outerwear', 'Верхняя одежда');
-INSERT INTO public.clothes_catalog VALUES (2, 'Шубы', 'shuby', 'image/catalog/6_JfVWL0A.jpg', 'Fur coats', 'Шубы');
-INSERT INTO public.clothes_catalog VALUES (3, 'Тренчи', 'trenchi', 'image/catalog/7_gflUJ23.jpg', 'trench coats', 'Тренчи');
-INSERT INTO public.clothes_catalog VALUES (4, 'Пальто', 'palto', 'image/catalog/5_l60fzsy.jpg', 'Coat', 'Пальто');
-INSERT INTO public.clothes_catalog VALUES (5, 'Пуховики и жилеты', 'puhoviki-i-zhilety', 'image/catalog/7_gur0KDW.jpg', 'Down jackets and vests', 'Пуховики и жилеты');
-INSERT INTO public.clothes_catalog VALUES (6, 'Парки', 'parki', 'image/catalog/7_OZirk6m.jpg', 'parks', 'Парки');
+INSERT INTO public.clothes_catalog VALUES (1, 'Верхняя одежда', 'verhnyaya-odezhda', 'image/catalog/4.jpg', 'Outerwear', 'Верхняя одежда');
+INSERT INTO public.clothes_catalog VALUES (2, 'Шубы', 'shuby', 'image/catalog/6.jpg', 'Fur coats', 'Шубы');
+INSERT INTO public.clothes_catalog VALUES (3, 'Тренчи', 'trenchi', 'image/catalog/7.jpg', 'trench coats', 'Тренчи');
+INSERT INTO public.clothes_catalog VALUES (4, 'Пальто', 'palto', 'image/catalog/5.jpg', 'Coat', 'Пальто');
+INSERT INTO public.clothes_catalog VALUES (5, 'Пуховики и жилеты', 'puhoviki-i-zhilety', 'image/catalog/7.jpg', 'Down jackets and vests', 'Пуховики и жилеты');
+INSERT INTO public.clothes_catalog VALUES (6, 'Парки', 'parki', 'image/catalog/7.jpg', 'parks', 'Парки');
 
 
 --
