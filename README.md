@@ -2,7 +2,8 @@
 
 ## Описание
 
-Проект на Django с использованием PostgreSQL. Можно запускать локально через `runserver` или через Docker. Все медиа-файлы и база данных остаются в контейнерах при использовании Docker, что упрощает переносимость и настройку окружения.
+Проект на Django с использованием PostgreSQL. 
+Можно запускать локально через `runserver` или через Docker.
 
 ## Требования
 
@@ -17,12 +18,32 @@
 
 ```bash
 cp ./.env.example ./.env
+```
 
-Для запуска через Docker соберите и запустите контейнеры: docker-compose up -d --build. 
+Для запуска через Docker соберите и запустите контейнеры: 
+
+```bash
+docker-compose up -d --build. 
+```
+
 Сайт будет доступен по адресу http://localhost:8000/.
 
-Для локального запуска через runserver установите зависимости: pip install -r requirements.txt. 
+
+Для локального запуска через runserver установите зависимости: 
+
+```bash
+pip install -r requirements.txt 
+```
+
+
 Используется локальная база SQLite (db.sqlite3). 
-Если нужно, создайте миграции: python manage.py migrate. 
+Если нужно, создайте миграции: 
+
+
+```bash
+python manage.py migrate. 
+```
+
 Запустите сервер разработки: python manage.py runserver. 
+
 Сайт будет доступен по адресу http://127.0.0.1:8000/.
