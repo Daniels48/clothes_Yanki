@@ -1,2 +1,0 @@
-def backends():
-    return None
